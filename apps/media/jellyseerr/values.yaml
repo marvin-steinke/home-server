@@ -1,0 +1,52 @@
+app-template:
+  controllers:
+    jellyseerr:
+      containers:
+        app:
+          image:
+            repository: ghcr.io/fallenbagel/jellyseerr
+            tag: 2.5.2
+          env:
+            TZ: Europe/Berlin
+            LOG_LEVEL: "info"
+            PORT: &port 5055
+          envFrom:
+            - secretRef:
+                name: jellyseerr
+          probes:
+            liveness: &probes
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /api/v1/status
+                  port: *port
+                initialDelaySeconds: 0
+                periodSeconds: 10
+                timeoutSeconds: 1
+                failureThreshold: 3
+            readiness: *probes
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+  service:
+    app:
+      controller: jellyseerr
+      type: LoadBalancer
+      ports:
+        http:
+          port: *port
+
+  persistence:
+    config:
+      storageClass: config
+      accessMode: ReadWriteOnce
+      size: 5Gi
+      globalMounts:
+        - path: /app/config
+    tmp:
+      type: emptyDir

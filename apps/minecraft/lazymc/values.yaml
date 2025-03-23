@@ -1,0 +1,92 @@
+app-template:
+  controllers:
+    lazymc:
+      containers:
+        app:
+          image:
+            repository: jarulsamy/lazymc-k8s
+            tag: 0.0.1
+          env:
+            LAZYMC_K8S_DEPLOYMENT_NAME: "minecraft-server"
+
+  service:
+    app:
+      controller: lazymc
+      type: LoadBalancer
+      ports:
+        tcp:
+          port: 25565
+          protocol: TCP
+
+  configMaps:
+    config:
+      data:
+        lazymc.toml: |
+          [public]
+          version = "1.21.5"
+          protocol = 767
+
+          [server]
+          address = "minecraft-server:25566"
+          directory = "/app"
+          command = "/usr/local/bin/python3 /app/main.py"
+          freeze_process = false
+
+          [time]
+          sleep_after = 30
+
+          [join]
+          methods = ["kick"]
+
+          [advanced]
+          rewrite_server_properties = false
+    server-properties:
+      data:
+        server.properties: |
+          white-list=true
+    whitelist:
+      data:
+        whitelist.json: |
+          [
+            {"name": "rn42v"},
+            {"name": "AurusDelicti"}
+          ]
+
+  persistence:
+    config:
+      type: configMap
+      name: lazymc-config
+    server-properties:
+      type: configMap
+      name: lazymc-server-properties
+      globalMounts:
+        - path: /app/server.properties
+          subPath: server.properties
+    whitelist:
+      type: configMap
+      name: lazymc-whitelist
+      globalMounts:
+        - path: /app/whitelist.json
+          subPath: whitelist.json
+
+  rbac:
+    roles:
+      lazymc:
+        type: ClusterRole
+        rules:
+          - apiGroups: ["apps"]
+            resources: ["deployments"]
+            verbs: ["get", "list", "watch"]
+          - apiGroups: ["apps"]
+            resources: ["deployments/scale"]
+            verbs: ["get", "list", "watch", "update", "patch"]
+    bindings:
+      lazymc:
+        type: ClusterRoleBinding
+        roleRef:
+          kind: ClusterRole
+          name: lazymc
+        subjects:
+          - kind: ServiceAccount
+            name: default
+            namespace: "{{ .Release.Namespace }}"

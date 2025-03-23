@@ -1,0 +1,47 @@
+server: https://kubernetes.default.svc
+project: default
+source:
+  repoURL: https://github.com/marvin-steinke/home-server
+  targetRevision: HEAD
+
+namespaces:
+  - name: cert-manager
+    wave: -3
+    apps:
+      - cert-manager
+  - name: external-secrets
+    wave: -3
+    apps:
+      - external-secrets
+  - name: local-path-provisioner
+    wave: -3
+    apps:
+      - local-path-provisioner
+  - name: vpn-gateway
+    wave: -2
+    apps:
+      - vpn-gateway
+  - name: vpn
+    wave: -1
+    apps:
+      - prowlarr
+      - sabnzbd
+  - name: media
+    apps:
+      - radarr
+      - sonarr
+      - bazarr
+      - jellyfin
+      - jellyseerr
+  - name: minecraft
+    ignoreDifferences:
+      - group: apps
+        kind: Deployment
+        jsonPointers:
+          - /spec/replicas
+    apps:
+      - minecraft-server
+      - lazymc
+  - name: netcup
+    apps:
+      - netcup-dyndns

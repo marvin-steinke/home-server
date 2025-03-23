@@ -1,0 +1,18 @@
+minecraft:
+  replicaCount: 0
+  minecraftServer:
+    eula: TRUE
+    version: 1.21.5
+    ops: rn42v
+    whitelist: AurusDelicti, HALOGamer1900
+    difficulty: hard
+    gameMode: survival
+    memory: 4096M
+    serviceType: ClusterIP
+    servicePort: 25566
+
+  persistence:
+    dataDir:
+      enabled: true
+      Size: 10Gi
+      existingClaim: minecraft-world
