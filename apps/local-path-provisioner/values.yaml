@@ -1,0 +1,27 @@
+local-path-provisioner:
+  nodePathMap: []
+  storageClass:
+    create: false
+  storageClassConfigs:
+    local-path-config:
+      storageClass:
+        create: true
+        defaultClass: false
+        defaultVolumeType: hostPath
+        volumeBindingMode: WaitForFirstConsumer
+        reclaimPolicy: Retain
+        pathPattern: "{{ .PVC.Name }}"
+      nodePathMap:
+        - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+          paths:
+            - "/home/marvinsteinke/Desktop/cluster-configs/"
+    local-path-media:
+      storageClass:
+        create: true
+        defaultClass: false
+        defaultVolumeType: hostPath
+        volumeBindingMode: Immediate
+        reclaimPolicy: Retain
+        pathPattern: "{{ .PVC.Name }}"
+      sharedFileSystemPath: "/run/media/marvinsteinke/cluster-storage/"
+      nodePathMap: []

@@ -1,0 +1,18 @@
+image:
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  type: LoadBalancer
+extraEnv:
+  ADVERTISE_IP: "" # required
+  #PLEX_CLAIM:
+  HOSTNAME: Plex
+  TZ: Europe/Berlin
+extraVolumes:
+  - name: pms-library
+    persistentVolumeClaim:
+      claimName: *storage-fullname
+extraVolumeMounts:
+  - name: pms-library
+    mountPath: /data/library
+    subPath: library

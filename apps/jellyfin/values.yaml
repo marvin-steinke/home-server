@@ -1,0 +1,8 @@
+jellyfin:
+  service:
+    type: LoadBalancer
+  persistence:
+    config:
+      storageClass: "local-path-config"
+    media:
+      storageClass: "local-path-media"
