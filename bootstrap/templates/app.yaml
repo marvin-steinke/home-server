@@ -1,0 +1,33 @@
+{{- range .Values.namespaces }}
+{{- $namespace := . }}
+{{- range .apps }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ . }}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  {{- if hasKey $namespace "wave" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "{{ $namespace.wave }}"
+  {{- end }}
+spec:
+  destination:
+    namespace: {{ $namespace.name }}
+    server: {{ $.Values.server }}
+  project: {{ $.Values.project }}
+  source:
+    path: apps/{{ $namespace.name }}/{{ . }}
+    repoURL: {{ $.Values.source.repoURL }}
+    targetRevision: {{ $.Values.source.targetRevision }}
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+  {{- if hasKey $namespace "ignoreDifferences" }}
+  ignoreDifferences:
+    {{- toYaml $namespace.ignoreDifferences | nindent 4 }}
+  {{- end }}
+---
+{{- end }}
+{{- end }}

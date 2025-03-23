@@ -1,0 +1,8 @@
+{{- range (index .Values "pod-gateway").routed_namespaces }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ . }}
+  labels:
+    routed-gateway: "true"
+{{- end }}
