@@ -1,0 +1,60 @@
+app-template:
+  controllers:
+    prowlarr:
+      containers:
+        app:
+          image:
+            repository: ghcr.io/home-operations/prowlarr
+            tag: 1.33.2.5002
+          env:
+              PROWLARR__APP__INSTANCENAME: Prowlarr
+              PROWLARR__AUTH__METHOD: External
+              PROWLARR__LOG__DBENABLED: "False"
+              PROWLARR__LOG__LEVEL: info
+              PROWLARR__SERVER__PORT: &port 9696
+              PROWLARR__UPDATE__BRANCH: develop
+          envFrom:
+            - secretRef:
+                name: prowlarr
+          probes:
+            liveness: &probes
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /ping
+                  port: *port
+                initialDelaySeconds: 0
+                periodSeconds: 10
+                timeoutSeconds: 1
+                failureThreshold: 3
+            readiness: *probes
+            startup:
+              enabled: true
+              custom: true
+              spec:
+                exec:
+                  command:
+                    - sh
+                    - -c
+                    - if [ $(wget -q -O- https://ipinfo.io/country) == 'NL' ]; then exit 0; else exit $?; fi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+  service:
+    app:
+      controller: prowlarr
+      type: LoadBalancer
+      ports:
+        http:
+          port: *port
+
+  persistence:
+    config:
+      storageClass: config
+      accessMode: ReadWriteOnce
+      size: 5Gi

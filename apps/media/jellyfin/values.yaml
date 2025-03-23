@@ -1,0 +1,8 @@
+jellyfin:
+  service:
+    type: LoadBalancer
+  persistence:
+    config:
+      storageClass: config
+    media:
+      existingClaim: jellyfin

@@ -1,0 +1,52 @@
+app-template:
+  controllers:
+    bazarr:
+      containers:
+        app:
+          image:
+            repository: ghcr.io/home-operations/bazarr
+            tag: 1.5.1
+          env:
+            TZ: Europe/Berlin
+          #envFrom:
+          #  - secretRef:
+          #      name: bazarr
+          probes:
+            liveness: &probes
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /health
+                  port: &port 6767
+                initialDelaySeconds: 0
+                periodSeconds: 10
+                timeoutSeconds: 1
+                failureThreshold: 3
+            readiness: *probes
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+  service:
+    app:
+      controller: bazarr
+      type: LoadBalancer
+      ports:
+        http:
+          port: *port
+
+  persistence:
+    config:
+      storageClass: config
+      accessMode: ReadWriteOnce
+      size: 5Gi
+    tmp:
+      type: emptyDir
+    data:
+      type: nfs
+      server: 192.168.2.155
+      path: /mnt/nfs/data
