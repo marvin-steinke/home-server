@@ -1,0 +1,17 @@
+local-path-provisioner:
+  nodePathMap: []
+  storageClass:
+    create: false
+  storageClassConfigs:
+    config:
+      storageClass:
+        create: true
+        defaultClass: false
+        defaultVolumeType: hostPath
+        volumeBindingMode: WaitForFirstConsumer
+        reclaimPolicy: Retain
+        pathPattern: "{{ .PVC.Name }}"
+      nodePathMap:
+        - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
+          paths:
+            - /home/marvinsteinke/Desktop/cluster-configs/
