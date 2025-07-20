@@ -1,5 +1,5 @@
 ## Pod Gateway
-<img width="5320" height="1850" alt="pod_gateway" src="https://github.com/user-attachments/assets/127595c5-5bd0-422b-a5b1-40ecc073be6e" />
+<img width="5320" height="1850" alt="pod_gateway" src="https://github.com/user-attachments/assets/c7fc760d-c2ce-4b16-bc07-ae00f39d2117" />
 
 ## App Setup
 <img width="5320" height="1995" alt="app_setup" src="https://github.com/user-attachments/assets/3c7e0583-2047-44ec-b79b-14949cd31f31" />
