@@ -1,0 +1,34 @@
+app-template:
+  controllers:
+    cloudflare-tunnel:
+      containers:
+        app:
+          image:
+            repository: docker.io/cloudflare/cloudflared
+            tag: 2025.7.0
+          envFrom:
+            - secretRef:
+                name: cloudflare-tunnel
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cloudflared tunnel run 0.0.0.0:2000 --no-autoupdate --metrics
+          probes:
+            liveness:
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /health
+                  port: 2000
+                initialDelaySeconds: 10
+                periodSeconds: 10
+                timeoutSeconds: 1
+                failureThreshold: 1
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
