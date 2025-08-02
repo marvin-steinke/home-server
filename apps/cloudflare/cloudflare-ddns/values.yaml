@@ -1,6 +1,6 @@
 app-template:
   controllers:
-    netcup-dyndns:
+    cloudflare-ddns:
       type: cronjob
       cronjob:
         timeZone: Europe/Berlin
@@ -8,11 +8,11 @@ app-template:
       containers:
         app:
           image:
-            repository: ghcr.io/marvin-steinke/netcup-dyndns-client
-            tag: "5.0"
+            repository: docker.io/favonia/cloudflare-ddns
+            tag: 1.15.1
           env:
-            DOMAINLIST: "bobby-dev.de: @, *"
-            CHANGE_TTL: false
+            DOMAINS: "bobby-dev.de"
+            PROXIED: true
           envFrom:
             - secretRef:
-                name: netcup
+                name: cloudflare
