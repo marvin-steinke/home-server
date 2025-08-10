@@ -16,9 +16,6 @@ and set the `KUBECONFIG` env var in your shell profile
 export KUBECONFIG=$HOME/.kube/config
 ```
 
-### Setup ArgoCD
-https://argo-cd.readthedocs.io/en/stable/getting_started/
-
 ### Setup NFS Server
 ```bash
 sudo apt install nfs-kernel-server
@@ -35,6 +32,11 @@ sudo exportfs -a
 sudo systemctl restart nfs-kernel-server
 sudo systemctl enable nfs-kernel-server
 ```
+
+### Setup ArgoCD
+https://argo-cd.readthedocs.io/en/stable/getting_started/
+Upon syncing, I'm usually having some trouble with the cainjector health at
+some point. A restart of the node helps, not sure why.
 
 ## Pod Gateway
 <img width="5320" height="1850" alt="pod_gateway" src="https://github.com/user-attachments/assets/c7fc760d-c2ce-4b16-bc07-ae00f39d2117" />
