@@ -1,3 +1,24 @@
+## Installation
+
+### Setup k3s
+```bash
+# https://docs.k3s.io/quick-start
+curl -sfL https://get.k3s.io | sh -
+```
+optionally setup your kubectl config
+```bash
+mkdir -p ~/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+sudo chown $USER:$USER ~/.kube/config
+```
+and set the `KUBECONFIG` env var in your shell profile
+```bash
+export KUBECONFIG=$HOME/.kube/config
+```
+
+### Setup ArgoCD
+https://argo-cd.readthedocs.io/en/stable/getting_started/
+
 ## Pod Gateway
 <img width="5320" height="1850" alt="pod_gateway" src="https://github.com/user-attachments/assets/c7fc760d-c2ce-4b16-bc07-ae00f39d2117" />
 
