@@ -42,6 +42,3 @@ namespaces:
     apps:
       - minecraft-server
       - lazymc
-  - name: netcup
-    apps:
-      - netcup-dyndns
