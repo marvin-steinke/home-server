@@ -35,7 +35,7 @@ sudo systemctl enable nfs-kernel-server
 
 ### Setup ArgoCD
 https://argo-cd.readthedocs.io/en/stable/getting_started/
-Upon syncing, I'm usually having some trouble with the cainjector health at
+Upon installing the cert-manager, I'm usually having some trouble with the cainjector health at
 some point. A restart of the node helps, not sure why.
 
 ## Pod Gateway
