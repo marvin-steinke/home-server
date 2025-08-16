@@ -5,7 +5,7 @@ app-template:
         app:
           image:
             repository: ghcr.io/home-operations/sonarr
-            tag: 4.0.14.2938
+            tag: 4.0.15.2940
           env:
             SONARR__APP__INSTANCENAME: Sonarr
             SONARR__AUTH__METHOD: External
@@ -56,5 +56,5 @@ app-template:
       type: emptyDir
     data:
       type: nfs
-      server: 192.168.2.155
+      server: 192.168.2.226
       path: /mnt/nfs/data

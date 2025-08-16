@@ -5,7 +5,7 @@ app-template:
         app:
           image:
             repository: ghcr.io/home-operations/prowlarr
-            tag: 1.33.2.5002
+            tag: 2.0.3.5130
           env:
               PROWLARR__APP__INSTANCENAME: Prowlarr
               PROWLARR__AUTH__METHOD: External

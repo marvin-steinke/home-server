@@ -5,7 +5,7 @@ app-template:
         app:
           image:
             repository: ghcr.io/home-operations/sabnzbd
-            tag: 4.5.1
+            tag: 4.5.2
           env:
             SABNZBD__PORT: &port 8585
             SABNZBD__HOST_WHITELIST_ENTRIES: >-
@@ -63,7 +63,7 @@ app-template:
       type: emptyDir
     usenet:
       type: nfs
-      server: 192.168.2.155
+      server: 192.168.2.226
       path: /mnt/nfs/data
       globalMounts:
         - path: /data/usenet
