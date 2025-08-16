@@ -1,4 +1,4 @@
-name: Renovate
+name: Renovate - ${{ github.ref_name }} - ${{ github.run_number }}
 on:
   workflow_dispatch:
   schedule:
