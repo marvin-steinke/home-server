@@ -26,6 +26,10 @@ namespaces:
     apps:
       - prowlarr
       - sabnzbd
+  - name: cloudflare
+    apps:
+      - cloudflare-ddns
+      - cloudflared
   - name: media
     apps:
       - radarr
