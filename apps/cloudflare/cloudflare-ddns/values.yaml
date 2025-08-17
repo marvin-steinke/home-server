@@ -11,7 +11,7 @@ app-template:
             PROXIED: true
             IP6_PROVIDER: none
             TZ: Europe/Berlin
-            UPDATE_CRON: "@every 20 minutes"
+            UPDATE_CRON: "@every 20m"
           envFrom:
             - secretRef:
                 name: cloudflare-ddns
