@@ -1,6 +1,6 @@
 app-template:
   controllers:
-    cloudflare-tunnel:
+    cloudflared:
       containers:
         app:
           image:
@@ -8,7 +8,7 @@ app-template:
             tag: 2025.8.0
           envFrom:
             - secretRef:
-                name: cloudflare-tunnel
+                name: cloudflared
           command: ["cloudflared", "tunnel", "--no-autoupdate", "--loglevel", "debug", "--metrics", "0.0.0.0:2000", "run"]
           probes:
             liveness:
