@@ -9,11 +9,7 @@ app-template:
           envFrom:
             - secretRef:
                 name: cloudflare-tunnel
-          command:
-            - /bin/sh
-            - -c
-            - |
-              cloudflared tunnel run 0.0.0.0:2000 --no-autoupdate --metrics
+          command: ["cloudflared", "tunnel", "run", "0.0.0.0:2000", "--no-autoupdate", "--metrics"]
           probes:
             liveness:
               enabled: true
