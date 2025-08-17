@@ -35,15 +35,14 @@ sudo systemctl enable nfs-kernel-server
 
 ### Setup ArgoCD
 https://argo-cd.readthedocs.io/en/stable/getting_started/
-Upon installing the cert-manager, I'm usually having some trouble with the cainjector health at
-some point. A restart of the node helps, not sure why.
 
-## Pod Gateway
-<img width="5320" height="1850" alt="pod_gateway" src="https://github.com/user-attachments/assets/c7fc760d-c2ce-4b16-bc07-ae00f39d2117" />
+Upon installing the cert-manager, I'm usually having some trouble with the
+cainjector health at some point. A restart of the node helps, not sure why.
 
-## App Setup
-<img width="5320" height="1995" alt="app_setup" src="https://github.com/user-attachments/assets/3c7e0583-2047-44ec-b79b-14949cd31f31" />
-
+### Setup External Secrets Operator (ESO)
+To set up ESO, the auth secret for the provider (Infisical) needs to be
+created. If you choose a different provider, adjust the external-secret chart
+accordingly.
 ```bash
 kubectl create secret generic infisical-auth-credentials \
   --from-literal=clientId=<your-client-id-here> \
@@ -51,5 +50,11 @@ kubectl create secret generic infisical-auth-credentials \
   --namespace=default
 ```
 
+## App Setup
+<img width="5320" height="1995" alt="app_setup" src="https://github.com/user-attachments/assets/3c7e0583-2047-44ec-b79b-14949cd31f31" />
+
 ## Media Setup
 <img width="5320" height="3080" alt="media_setup" src="https://github.com/user-attachments/assets/45e40541-b1e6-4a54-8826-47ada30f384e" />
+
+## Pod Gateway
+<img width="5320" height="1850" alt="pod_gateway" src="https://github.com/user-attachments/assets/c7fc760d-c2ce-4b16-bc07-ae00f39d2117" />
