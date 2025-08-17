@@ -6,10 +6,10 @@ app-template:
           image:
             repository: docker.io/cloudflare/cloudflared
             tag: 2025.7.0
+          args: ["tunnel", "0.0.0.0:2000", "--no-autoupdate", "--metrics"]
           envFrom:
             - secretRef:
                 name: cloudflare-tunnel
-          command: ["cloudflared", "tunnel", "run", "0.0.0.0:2000", "--no-autoupdate", "--metrics"]
           probes:
             liveness:
               enabled: true
