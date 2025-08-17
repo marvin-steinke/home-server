@@ -1,10 +1,6 @@
 app-template:
   controllers:
     cloudflare-ddns:
-      type: cronjob
-      cronjob:
-        timeZone: Europe/Berlin
-        schedule: "*/30 * * * *"
       containers:
         app:
           image:
@@ -14,6 +10,8 @@ app-template:
             DOMAINS: bobby-dev.de
             PROXIED: true
             IP6_PROVIDER: none
+            TZ: Europe/Berlin
+            UPDATE_CRON: "@every 20 minutes"
           envFrom:
             - secretRef:
                 name: cloudflare-ddns
