@@ -12,11 +12,11 @@ app-template:
           command: ["cloudflared", "tunnel", "--no-autoupdate", "--loglevel", "debug", "--metrics", "0.0.0.0:2000", "run"]
           probes:
             liveness:
-              enabled: false
+              enabled: true
               custom: true
               spec:
                 httpGet:
-                  path: /health
+                  path: /ready
                   port: 2000
                 initialDelaySeconds: 10
                 periodSeconds: 10
