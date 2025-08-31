@@ -1,6 +1,6 @@
 apiVersion: v2
 version: 1.0.0
-name: netcup-dyndns
+name: cloudflared
 dependencies:
   - name: app-template
     repository: https://bjw-s-labs.github.io/helm-charts
