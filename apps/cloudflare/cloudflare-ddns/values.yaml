@@ -1,0 +1,17 @@
+app-template:
+  controllers:
+    cloudflare-ddns:
+      containers:
+        app:
+          image:
+            repository: docker.io/favonia/cloudflare-ddns
+            tag: 1.15.1
+          env:
+            DOMAINS: bobby-dev.de
+            PROXIED: true
+            IP6_PROVIDER: none
+            TZ: Europe/Berlin
+            UPDATE_CRON: "@every 20m"
+          envFrom:
+            - secretRef:
+                name: cloudflare-ddns
