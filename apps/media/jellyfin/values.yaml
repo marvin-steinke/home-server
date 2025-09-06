@@ -1,5 +1,8 @@
 jellyfin:
 
+  service:
+    type: LoadBalancer
+
   ingress:
     enabled: true
     className: traefik
