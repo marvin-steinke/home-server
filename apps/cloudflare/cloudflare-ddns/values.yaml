@@ -7,7 +7,7 @@ app-template:
             repository: docker.io/favonia/cloudflare-ddns
             tag: 1.15.1
           env:
-            DOMAINS: '*.bobby-dev.de'
+            DOMAINS: 'bobby-dev.de,*.bobby-dev.de'
             PROXIED: true
             IP6_PROVIDER: none
             TZ: Europe/Berlin
