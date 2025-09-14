@@ -13,7 +13,7 @@ app-template:
         app:
           image:
             repository: ghcr.io/home-operations/radarr
-            tag: 5.27.5.10184
+            tag: 5.28.0.10205
           env:
             RADARR__APP__INSTANCENAME: Radarr
             RADARR__AUTH__METHOD: External
