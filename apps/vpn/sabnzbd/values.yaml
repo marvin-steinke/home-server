@@ -71,7 +71,7 @@ app-template:
       type: emptyDir
     usenet:
       type: nfs
-      server: 192.168.2.191
+      server: 192.168.2.117
       path: /mnt/nfs/data
       globalMounts:
         - path: /data/usenet
