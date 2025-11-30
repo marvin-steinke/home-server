@@ -56,5 +56,5 @@ app-template:
       type: emptyDir
     data:
       type: nfs
-      server: 192.168.2.191
+      server: 192.168.2.117
       path: /mnt/nfs/data
