@@ -37,12 +37,12 @@ namespaces:
       - bazarr
       - jellyfin
       - jellyseerr
-  - name: minecraft
-    ignoreDifferences:
-      - group: apps
-        kind: Deployment
-        jsonPointers:
-          - /spec/replicas
-    apps:
-      - minecraft-server
-      - lazymc
+  #- name: minecraft
+  #  ignoreDifferences:
+  #    - group: apps
+  #      kind: Deployment
+  #      jsonPointers:
+  #        - /spec/replicas
+  #  apps:
+  #    - minecraft-server
+  #    - lazymc
