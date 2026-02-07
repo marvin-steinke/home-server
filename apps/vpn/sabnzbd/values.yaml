@@ -13,7 +13,7 @@ app-template:
         app:
           image:
             repository: ghcr.io/home-operations/sabnzbd
-            tag: 4.5.3
+            tag: 4.5.5
           env:
             SABNZBD__PORT: &port 8585
             SABNZBD__HOST_WHITELIST_ENTRIES: >-
