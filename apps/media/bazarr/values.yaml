@@ -13,7 +13,7 @@ app-template:
         app:
           image:
             repository: ghcr.io/home-operations/bazarr
-            tag: 1.5.2
+            tag: 1.5.4
           env:
             TZ: Europe/Berlin
           #envFrom:
@@ -56,5 +56,5 @@ app-template:
       type: emptyDir
     data:
       type: nfs
-      server: 192.168.2.191
+      server: 192.168.2.117
       path: /mnt/nfs/data
