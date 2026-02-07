@@ -2,7 +2,7 @@ server: https://kubernetes.default.svc
 project: default
 source:
   repoURL: https://github.com/marvin-steinke/home-server
-  targetRevision: HEAD
+  targetRevision: main
 
 namespaces:
   - name: cert-manager
@@ -26,6 +26,10 @@ namespaces:
     apps:
       - prowlarr
       - sabnzbd
+  - name: cloudflare
+    apps:
+      - cloudflare-ddns
+      - cloudflared
   - name: media
     apps:
       - radarr
@@ -33,15 +37,12 @@ namespaces:
       - bazarr
       - jellyfin
       - jellyseerr
-  - name: minecraft
-    ignoreDifferences:
-      - group: apps
-        kind: Deployment
-        jsonPointers:
-          - /spec/replicas
-    apps:
-      - minecraft-server
-      - lazymc
-  - name: netcup
-    apps:
-      - netcup-dyndns
+  #- name: minecraft
+  #  ignoreDifferences:
+  #    - group: apps
+  #      kind: Deployment
+  #      jsonPointers:
+  #        - /spec/replicas
+  #  apps:
+  #    - minecraft-server
+  #    - lazymc

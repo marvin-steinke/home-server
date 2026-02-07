@@ -1,0 +1,30 @@
+app-template:
+  controllers:
+    cloudflared:
+      containers:
+        app:
+          image:
+            repository: docker.io/cloudflare/cloudflared
+            tag: 2025.11.1
+          envFrom:
+            - secretRef:
+                name: cloudflared
+          command: ["cloudflared", "tunnel", "--no-autoupdate", "--loglevel", "debug", "--metrics", "0.0.0.0:2000", "run"]
+          probes:
+            liveness:
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /ready
+                  port: 2000
+                initialDelaySeconds: 10
+                periodSeconds: 10
+                timeoutSeconds: 1
+                failureThreshold: 1
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
