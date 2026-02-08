@@ -1,69 +1,79 @@
 pod-gateway:
-  image:
-    repository: ghcr.io/angelnu/pod-gateway
-    tag: v1.13.0
-    pullPolicy: IfNotPresent
-  webhook:
-    image:
-      repository: ghcr.io/angelnu/gateway-admision-controller
-      tag: v3.12.0
-      pullPolicy: IfNotPresent
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: ghcr.io/angelnu/pod-gateway
+            tag: v1.13.0
+            pullPolicy: IfNotPresent
+        gluetun:
+          enabled: true
+          dependsOn: main
+          image:
+            repository: docker.io/qmcgaw/gluetun
+            tag: v3.40.0
+            pullPolicy: IfNotPresent
+          env:
+            VPN_SERVICE_PROVIDER: mullvad
+            VPN_TYPE: wireguard
+            VPN_INTERFACE: &vpn-interface wg0
+            FIREWALL: "off"
+            DOT: "off"
+            SERVER_CITIES: Amsterdam
+          envFrom:
+            - secretRef:
+                name: mullvad
+          probes:
+            liveness:
+              enabled: true
+              custom: true
+              spec:
+                exec:
+                  command:
+                    - sh
+                    - -c
+                    - if [ $(wget -q -O- https://ipinfo.io/country) == 'NL' ]; then exit 0; else exit $?; fi
+                initialDelaySeconds: 30
+                periodSeconds: 60
+                failureThreshold: 3
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+
+    webhook:
+      containers:
+        main:
+          image:
+            repository: ghcr.io/angelnu/gateway-admision-controller
+            tag: v3.12.0
+            pullPolicy: IfNotPresent
+
+  networkpolicies:
+    main:
+      enabled: true
+      controller: main
+      policyTypes:
+        - Egress
+      rules:
+        egress:
+          - to:
+              - ipBlock:
+                  cidr: 0.0.0.0/0
+            ports:
+              - port: &vpn-port 51820
+                protocol: UDP
+          - to:
+              - namespaceSelector: {}
+
   DNS: 172.16.1.1
   routed_namespaces:
     - vpn
   settings:
     VXLAN_IP_NETWORK: "172.16.1"
-    VPN_INTERFACE: &vpn-interface wg0
+    VPN_INTERFACE: *vpn-interface
     VPN_BLOCK_OTHER_TRAFFIC: true
-    VPN_TRAFFIC_PORT: &vpn-port 51820
+    VPN_TRAFFIC_PORT: *vpn-port
     NOT_ROUTED_TO_GATEWAY_CIDRS: &local-cidrs "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
     VPN_LOCAL_CIDRS: *local-cidrs
-  addons:
-    vpn:
-      enabled: true
-      type: gluetun
-      gluetun:
-        image:
-          repository: docker.io/qmcgaw/gluetun
-          tag: v3.40.0
-          pullPolicy: IfNotPresent
-      securityContext:
-        capabilities:
-          add:
-            - NET_ADMIN
-      env:
-        - name:  VPN_SERVICE_PROVIDER
-          value: mullvad
-        - name:  VPN_TYPE
-          value: wireguard
-        - name:  VPN_INTERFACE
-          value: *vpn-interface
-        - name:  FIREWALL
-          value: "off"
-        - name:  DOT
-          value: "off"
-        - name:  SERVER_CITIES
-          value: Amsterdam
-      envFrom:
-        - secretRef:
-            name: mullvad
-      livenessProbe:
-        exec:
-          command:
-            - sh
-            - -c
-            - if [ $(wget -q -O- https://ipinfo.io/country) == 'NL' ]; then exit 0; else exit $?; fi
-        initialDelaySeconds: 30
-        periodSeconds: 60
-        failureThreshold: 3
-      networkPolicy:
-        enabled: true
-        egress:
-          - to:
-            - ipBlock:
-                cidr: 0.0.0.0/0
-            ports:
-            - port: *vpn-port
-              protocol: UDP
-          - to:
-            - namespaceSelector: {}
