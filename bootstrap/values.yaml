@@ -2,7 +2,7 @@ server: https://kubernetes.default.svc
 project: default
 source:
   repoURL: https://github.com/marvin-steinke/home-server
-  targetRevision: update-vpn-gateway-chart
+  targetRevision: main
 
 namespaces:
   - name: cert-manager
