@@ -10,6 +10,8 @@ local-path-provisioner:
         defaultVolumeType: hostPath
         volumeBindingMode: WaitForFirstConsumer
         reclaimPolicy: Retain
+        annotations:
+          allowUnsafePathPattern: "true"
         pathPattern: "{{ .PVC.Name }}"
       nodePathMap:
         - node: DEFAULT_PATH_FOR_NON_LISTED_NODES
