@@ -1,0 +1,68 @@
+app-template:
+  controllers:
+    plex:
+      containers:
+        app:
+          image:
+            repository: ghcr.io/home-operations/plex
+            tag: 1.43.0
+          env:
+            TZ: Europe/Berlin
+            PLEX_ADVERTISE_URL: http://192.168.2.117:32400,http://plex.default.svc.cluster.local:32400
+            #CLAIM:
+          probes:
+            liveness:
+              enabled: true
+              spec:
+                periodSeconds: 30
+                timeoutSeconds: 5
+                failureThreshold: 5
+            readiness:
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /identity
+                  port: &port 32400
+                periodSeconds: 10
+                timeoutSeconds: 5
+                failureThreshold: 5
+            startup:
+              enabled: true
+              spec:
+                failureThreshold: 30
+                periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+
+  defaultPodOptions:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 2000
+      runAsGroup: 2000
+      fsGroup: 2000
+      fsGroupChangePolicy: OnRootMismatch
+
+  service:
+    app:
+      type: LoadBalancer
+      ports:
+        http:
+          port: *port
+
+  persistence:
+    config:
+      storageClass: config
+      accessMode: ReadWriteOnce
+      size: 5Gi
+    media:
+      type: nfs
+      server: 192.168.2.117
+      path: /mnt/nfs/data/media
+      globalMounts:
+        - path: /media
+          readOnly: true
+    tmp:
+      type: emptyDir
