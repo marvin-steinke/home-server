@@ -3,8 +3,6 @@ authentik:
     envFrom:
       - secretRef:
           name: authentik-external
-      - secretRef:
-          name: postgresql
   authentik:
     postgresql:
       host: 192.168.2.117
