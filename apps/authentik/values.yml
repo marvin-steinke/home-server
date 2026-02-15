@@ -1,0 +1,30 @@
+authentik:
+  global:
+    envFrom:
+      - secretRef:
+          name: authentik
+  authentik:
+    postgresql:
+      host: 192.168.2.117
+      user: file:///postgres-creds/username
+      password: file:///postgres-creds/password
+  server:
+    service:
+      type: LoadBalancer
+    volumes:
+      - name: postgres-creds
+        secret:
+          secretName: postgresql
+    volumeMounts:
+      - name: postgres-creds
+        mountPath: /postgres-creds
+        readOnly: true
+  worker:
+    volumes:
+      - name: postgres-creds
+        secret:
+          secretName: postgresql
+    volumeMounts:
+      - name: postgres-creds
+        mountPath: /postgres-creds
+        readOnly: true
