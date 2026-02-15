@@ -2,7 +2,7 @@ server: https://kubernetes.default.svc
 project: default
 source:
   repoURL: https://github.com/marvin-steinke/home-server
-  targetRevision: main
+  targetRevision: authentik
 
 namespaces:
   - name: cert-manager
@@ -17,6 +17,10 @@ namespaces:
     wave: -3
     apps:
       - local-path-provisioner
+  - name: authentik
+    wave: -3
+    apps:
+      - authentik
   - name: vpn-gateway
     wave: -2
     apps:
