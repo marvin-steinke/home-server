@@ -2,7 +2,7 @@ authentik:
   global:
     envFrom:
       - secretRef:
-          name: authentik
+          name: authentik-external
   authentik:
     postgresql:
       host: 192.168.2.117
