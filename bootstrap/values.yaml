@@ -24,8 +24,7 @@ namespaces:
   - name: traefik
     wave: -3
     apps:
-      - config
-      - middlewares
+      - traefik
   - name: vpn-gateway
     wave: -2
     apps:
