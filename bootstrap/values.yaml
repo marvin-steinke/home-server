@@ -21,6 +21,11 @@ namespaces:
     wave: -3
     apps:
       - authentik
+  - name: traefik
+    wave: -3
+    apps:
+      - config
+      - middlewares
   - name: vpn-gateway
     wave: -2
     apps:
