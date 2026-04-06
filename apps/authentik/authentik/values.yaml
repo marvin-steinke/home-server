@@ -10,6 +10,7 @@ authentik:
     service:
       type: LoadBalancer
     ingress:
+      https: true
       enabled: true
       ingressClassName: traefik
       annotations:
