@@ -7,8 +7,6 @@ authentik:
     postgresql:
       host: 192.168.2.117
   server:
-    servicePortHttp: 9080
-    servicePortHttps: 9443
     service:
       type: LoadBalancer
     ingress:
