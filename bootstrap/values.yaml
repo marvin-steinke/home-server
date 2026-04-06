@@ -21,7 +21,7 @@ namespaces:
     wave: -3
     apps:
       - authentik
-  - name: traefik
+  - name: kube-system
     wave: -3
     apps:
       - traefik
