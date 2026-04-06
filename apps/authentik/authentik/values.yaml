@@ -21,7 +21,4 @@ authentik:
           hosts:
             - authentik.bobby-dev.de
       hosts:
-        - host: authentik.bobby-dev.de
-          paths:
-            - path: /
-              pathType: Prefix
+        - authentik.bobby-dev.de
