@@ -59,14 +59,14 @@ app-template:
         traefik.ingress.kubernetes.io/router.tls: "true"
         cert-manager.io/cluster-issuer: "letsencrypt"
       hosts:
-        - host: jellyseer.bobby-dev.de
+        - host: jellyseerr.bobby-dev.de
           paths:
             - path: /
               pathType: Prefix
       tls:
         - secretName: jellyseerr-tls
           hosts:
-            - jellyseer.bobby-dev.de
+            - jellyseerr.bobby-dev.de
 
   persistence:
     config:
