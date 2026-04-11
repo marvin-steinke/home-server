@@ -7,7 +7,7 @@ app-template:
           runAsGroup: 2000
           runAsNonRoot: true
           fsGroup: 2000
-          fsGroupChangePolicy: "OnRootMismatch"
+          fsGroupChangePolicy: OnRootMismatch
 
       containers:
         app:
@@ -16,7 +16,7 @@ app-template:
             tag: 2.7.3
           env:
             TZ: Europe/Berlin
-            LOG_LEVEL: "info"
+            LOG_LEVEL: info
             PORT: &port 5055
           envFrom:
             - secretRef:
@@ -57,16 +57,16 @@ app-template:
         traefik.ingress.kubernetes.io/router.middlewares: kube-system-forward-auth-to-authentik@kubernetescrd
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.tls: "true"
-        cert-manager.io/cluster-issuer: "letsencrypt"
+        cert-manager.io/cluster-issuer: letsencrypt
       hosts:
-        - host: jellyseerr.bobby-dev.de
+        - host: &host jellyseerr.bobby-dev.de
           paths:
             - path: /
               pathType: Prefix
       tls:
         - secretName: jellyseerr-tls
           hosts:
-            - jellyseerr.bobby-dev.de
+            - *host
 
   persistence:
     config:
