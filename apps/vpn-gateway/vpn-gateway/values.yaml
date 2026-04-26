@@ -12,7 +12,7 @@ pod-gateway:
           dependsOn: main
           image:
             repository: docker.io/qmcgaw/gluetun
-            tag: v3.40.0
+            tag: v3.41.1
             pullPolicy: IfNotPresent
           env:
             VPN_SERVICE_PROVIDER: mullvad
