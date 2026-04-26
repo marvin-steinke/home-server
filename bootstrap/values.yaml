@@ -44,7 +44,6 @@ namespaces:
       - sonarr
       - bazarr
       - jellyfin
-      - plex
       - jellyseerr
   #- name: minecraft
   #  ignoreDifferences:
