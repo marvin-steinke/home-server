@@ -7,7 +7,7 @@ app-template:
           runAsGroup: 2000
           runAsNonRoot: true
           fsGroup: 2000
-          fsGroupChangePolicy: "OnRootMismatch"
+          fsGroupChangePolicy: OnRootMismatch
 
       containers:
         app:
@@ -52,6 +52,25 @@ app-template:
       ports:
         http:
           port: *port
+
+  ingress:
+    app:
+      enabled: true
+      className: traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.middlewares: kube-system-forward-auth-to-authentik@kubernetescrd
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        cert-manager.io/cluster-issuer: letsencrypt
+      hosts:
+        - host: &host sonarr.bobby-dev.de
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: sonarr-tls
+          hosts:
+            - *host
 
   persistence:
     config:

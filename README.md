@@ -1,6 +1,7 @@
 ## Installation
 
 ### Setup k3s
+
 ```bash
 # https://docs.k3s.io/quick-start
 curl -sfL https://get.k3s.io | sh -
@@ -17,6 +18,7 @@ export KUBECONFIG=$HOME/.kube/config
 ```
 
 ### Setup NFS Server
+
 ```bash
 sudo apt install nfs-kernel-server
 # if you want to adjust the nfs dir, reflect the changes in the apps' yamls too
@@ -32,6 +34,37 @@ sudo exportfs -a
 sudo systemctl restart nfs-kernel-server
 sudo systemctl enable nfs-kernel-server
 ```
+
+### Setup PostgreSQL
+
+```bash
+sudo apt install postgresql
+sudo -u postgres psql
+```
+
+```sql
+CREATE USER authentik WITH PASSWORD 'your_password';
+CREATE DATABASE authentik OWNER authentik;
+\c authentik
+GRANT ALL ON SCHEMA public TO authentik;
+ALTER SCHEMA public OWNER TO authentik;
+\q
+```
+
+```bash
+# edit postgresql.conf
+sudo vim /etc/postgresql/{version}/main/postgresql.conf
+# change:
+listen_addresses = '*'
+
+# edit pg_hba.conf
+sudo vim /etc/postgresql/{version}/main/pg_hba.conf
+# add the following line to allow connections from the k3s cluster (adjust the IP range if needed):
+# host    all             all             10.42.0.0/16            scram-sha-256
+
+sudo systemctl restart postgresql
+```
+
 
 ### Setup ArgoCD
 https://argo-cd.readthedocs.io/en/stable/getting_started/

@@ -17,6 +17,14 @@ namespaces:
     wave: -3
     apps:
       - local-path-provisioner
+  - name: authentik
+    wave: -3
+    apps:
+      - authentik
+  - name: kube-system
+    wave: -3
+    apps:
+      - traefik
   - name: vpn-gateway
     wave: -2
     apps:
