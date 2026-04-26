@@ -61,6 +61,25 @@ app-template:
         http:
           port: *port
 
+  ingress:
+    app:
+      enabled: true
+      className: traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.middlewares: kube-system-forward-auth-to-authentik@kubernetescrd
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        cert-manager.io/cluster-issuer: letsencrypt
+      hosts:
+        - host: &host prowlarr.bobby-dev.de
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: prowlarr-tls
+          hosts:
+            - *host
+
   persistence:
     config:
       storageClass: config
