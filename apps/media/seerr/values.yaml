@@ -12,8 +12,8 @@ app-template:
       containers:
         app:
           image:
-            repository: ghcr.io/fallenbagel/seerr
-            tag: 2.7.3
+            repository: ghcr.io/seerr-team/seerr
+            tag: v3.3.0
           env:
             TZ: Europe/Berlin
             LOG_LEVEL: info
