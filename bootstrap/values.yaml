@@ -44,7 +44,7 @@ namespaces:
       - sonarr
       - bazarr
       - jellyfin
-      - jellyseerr
+      - seerr
   #- name: minecraft
   #  ignoreDifferences:
   #    - group: apps
