@@ -13,7 +13,7 @@ app-template:
         app:
           image:
             repository: ghcr.io/home-operations/sonarr
-            tag: 4.0.19.2991
+            tag: 4.0.19.2995
           env:
             SONARR__APP__INSTANCENAME: Sonarr
             SONARR__AUTH__METHOD: External
