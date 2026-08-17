@@ -22,6 +22,7 @@ app-template:
               sabnzbd.downloads.svc,
               sabnzbd.downloads.svc.cluster,
               sabnzbd.downloads.svc.cluster.local,
+              sabnzbd.bobby-dev.de,
           envFrom:
             - secretRef:
                 name: sabnzbd
