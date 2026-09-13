@@ -1,16 +1,28 @@
 {{- range .Values.namespaces }}
 {{- $namespace := . }}
 {{- range .apps }}
+{{- $application := . }}
+{{- $overrides := index $.Values.applicationOverrides $application | default dict }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ . }}
+  name: {{ $application }}
   namespace: argocd
+  {{- if hasKey $overrides "finalizers" }}
+  finalizers:
+    {{- toYaml $overrides.finalizers | nindent 4 }}
+  {{- else }}
   finalizers:
     - resources-finalizer.argocd.argoproj.io
-  {{- if hasKey $namespace "wave" }}
+  {{- end }}
+  {{- if or (hasKey $namespace "wave") (hasKey $overrides "annotations") }}
   annotations:
+    {{- if hasKey $overrides "annotations" }}
+      {{- toYaml $overrides.annotations | nindent 4 }}
+    {{- end }}
+    {{- if hasKey $namespace "wave" }}
     argocd.argoproj.io/sync-wave: "{{ $namespace.wave }}"
+    {{- end }}
   {{- end }}
 spec:
   destination:
@@ -18,15 +30,24 @@ spec:
     server: {{ $.Values.server }}
   project: {{ $.Values.project }}
   source:
-    path: apps/{{ $namespace.name }}/{{ . }}
+    path: apps/{{ $namespace.name }}/{{ $application }}
     repoURL: {{ $.Values.source.repoURL }}
     targetRevision: {{ $.Values.source.targetRevision }}
   syncPolicy:
+    {{- if hasKey $overrides "automated" }}
+    automated:
+      {{- toYaml $overrides.automated | nindent 6 }}
+    {{- else }}
     automated:
       prune: true
       selfHeal: true
+    {{- end }}
     syncOptions:
+      {{- if hasKey $overrides "syncOptions" }}
+        {{- toYaml $overrides.syncOptions | nindent 6 }}
+      {{- else }}
       - CreateNamespace=true
+      {{- end }}
   {{- if hasKey $namespace "ignoreDifferences" }}
   ignoreDifferences:
     {{- toYaml $namespace.ignoreDifferences | nindent 4 }}

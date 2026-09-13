@@ -4,7 +4,22 @@ source:
   repoURL: https://github.com/marvin-steinke/home-server
   targetRevision: main
 
+applicationOverrides:
+  argocd:
+    finalizers: []
+    annotations:
+      argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
 namespaces:
+  - name: argocd
+    apps:
+      - argocd
   - name: cert-manager
     wave: -3
     apps:
