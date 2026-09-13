@@ -1,0 +1,58 @@
+argo-cd:
+  fullnameOverride: argocd
+
+  crds:
+    install: true
+    keep: true
+
+  global:
+    domain: argocd.bobby-dev.de
+
+  configs:
+    cm:
+      url: https://argocd.bobby-dev.de
+      oidc.config: |
+        name: Authentik
+        issuer: https://authentik.bobby-dev.de/application/o/argocd/
+        clientID: argocd
+        clientSecret: $argocd-oidc:clientSecret
+        requestedScopes:
+          - openid
+          - profile
+          - email
+          - preferred_username
+    params:
+      controller.resource.health.persist: "true"
+      server.insecure: true
+    rbac:
+      policy.default: ""
+      policy.csv: |
+        g, akadmin, role:admin
+      scopes: "[preferred_username]"
+    secret:
+      createSecret: false
+
+  dex:
+    enabled: false
+
+  redisSecretInit:
+    enabled: false
+
+  server:
+    service:
+      type: ClusterIP
+    certificate:
+      enabled: true
+      issuer:
+        group: cert-manager.io
+        kind: ClusterIssuer
+        name: letsencrypt
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+      hostname: argocd.bobby-dev.de
+      tls: true

@@ -15,7 +15,14 @@ authentik:
     postgresql:
       host: 192.168.2.117
 
+  blueprints:
+    configMaps:
+      - argocd-blueprint
+
   worker:
+    envFrom:
+      - secretRef:
+          name: argocd-oidc
     containerSecurityContext: &containerSecurityContext
       runAsNonRoot: true
       readOnlyRootFilesystem: true
