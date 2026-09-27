@@ -153,6 +153,20 @@ argocd app list
 unset ARGOCD_AUTH_TOKEN
 ```
 
+To update and sync the root `home-server` Application, authenticate with an
+account permitted to sync applications (`personal-cli-admin` or an
+administrator; the `github-actions` account cannot sync), then run from the
+repository root:
+
+```bash
+.github/scripts/set-argocd-revision.sh main
+```
+
+The script waits for the root Application to become synced and healthy. For the
+public endpoint, set `ARGOCD_OPTS=--grpc-web` as shown above. Child Applications
+continue to use the revision specified by the selected branch's
+`bootstrap/values.yaml`.
+
 Rotate the tokens before they expire: generate and verify replacements, update
 the GitHub secret or personal Keychain entry, then revoke the old token IDs with
 `argocd account delete-token --account <account> <token-id> --grpc-web`. An
