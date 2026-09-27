@@ -120,6 +120,45 @@ gRPC-Web:
 argocd login argocd.bobby-dev.de --grpc-web --sso
 ```
 
+For CLI automation, the chart defines two API-only accounts. `github-actions`
+can get and update only the `default/home-server` Application;
+`personal-cli-admin` has full Argo CD access. After these accounts have
+reconciled, use an authenticated Argo CD administrator session to issue separate
+expiring tokens. The feature-branch workflow reads the CI token from the GitHub
+Actions repository secret `ARGOCD_AUTH_TOKEN`:
+
+```bash
+ssh -i ~/.ssh/bobby bobby@192.168.2.117 \
+  'argocd account generate-token --account github-actions --expires-in 2160h --grpc-web' |
+  gh secret set ARGOCD_AUTH_TOKEN --repo marvin-steinke/home-server
+```
+
+The server's authenticated Argo CD CLI issues the token, while `gh` runs on
+your Mac. Do not print the token or store it in the repository. Generate the
+personal token on the server separately and save its output immediately in a
+password manager or macOS Keychain; it is valid for 30 days:
+
+```bash
+argocd account generate-token --account personal-cli-admin --expires-in 720h --grpc-web
+```
+
+On a Mac, `security add-generic-password -U -a personal-cli-admin -s
+argocd.bobby-dev.de -w` prompts for the token without putting it in shell
+history. Once stored in Keychain, use it with the local CLI:
+
+```bash
+export ARGOCD_SERVER=argocd.bobby-dev.de ARGOCD_OPTS=--grpc-web
+export ARGOCD_AUTH_TOKEN="$(security find-generic-password -a personal-cli-admin -s argocd.bobby-dev.de -w)"
+argocd app list
+unset ARGOCD_AUTH_TOKEN
+```
+
+Rotate the tokens before they expire: generate and verify replacements, update
+the GitHub secret or personal Keychain entry, then revoke the old token IDs with
+`argocd account delete-token --account <account> <token-id> --grpc-web`. An
+administrator can list the token IDs with `argocd account get --account
+<account> --grpc-web`.
+
 For recovery, use the existing local Argo CD administrator access while
 diagnosing Authentik, ingress, certificate, or OIDC configuration. Do not
 delete the Argo CD namespace, CRDs, or Helm-managed resources as a recovery
