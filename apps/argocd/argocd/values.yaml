@@ -32,6 +32,7 @@ argo-cd:
         g, akadmin, role:admin
         p, github-actions, applications, get, default/home-server, allow
         p, github-actions, applications, update, default/home-server, allow
+        p, github-actions, applications, sync, default/home-server, allow
         p, personal-cli-admin, *, *, *, allow
       scopes: "[preferred_username]"
     secret:
