@@ -1,0 +1,31 @@
+name: Set Argo CD revision
+run-name: Set Argo CD revision - ${{ github.ref_name }}
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: set-argocd-revision
+  cancel-in-progress: false
+
+jobs:
+  set-revision:
+    if: github.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Install Argo CD CLI
+        run: |
+          curl --fail --location --silent --show-error \
+            --output "$RUNNER_TEMP/argocd" \
+            https://argocd.bobby-dev.de/download/argocd-linux-amd64
+          sudo install -m 755 "$RUNNER_TEMP/argocd" /usr/local/bin/argocd
+      - name: Set revision and sync
+        env:
+          ARGOCD_SERVER: argocd.bobby-dev.de
+          ARGOCD_OPTS: --grpc-web
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+        run: chmod +x .github/scripts/set-argocd-revision.sh && .github/scripts/set-argocd-revision.sh "$GITHUB_REF_NAME"

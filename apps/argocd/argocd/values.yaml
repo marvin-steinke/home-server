@@ -11,6 +11,8 @@ argo-cd:
   configs:
     cm:
       url: https://argocd.bobby-dev.de
+      accounts.github-actions: apiKey
+      accounts.personal-cli-admin: apiKey
       oidc.config: |
         name: Authentik
         issuer: https://authentik.bobby-dev.de/application/o/argocd/
@@ -28,6 +30,10 @@ argo-cd:
       policy.default: ""
       policy.csv: |
         g, akadmin, role:admin
+        p, github-actions, applications, get, default/home-server, allow
+        p, github-actions, applications, update, default/home-server, allow
+        p, github-actions, applications, sync, default/home-server, allow
+        p, personal-cli-admin, *, *, *, allow
       scopes: "[preferred_username]"
     secret:
       createSecret: false
