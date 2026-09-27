@@ -7,11 +7,10 @@ argument-hint: "Describe the feature to test and the current branch state"
 # Feature Branch Testing
 
 Use this skill to test one feature branch at a time in the shared Kubernetes
-cluster. Work from the repository root. The root `home-server` Application's
-revision is changed by `.github/scripts/set-argocd-revision.sh`; child
-Applications use `source.targetRevision` from the selected branch's
-`bootstrap/values.yaml`. Both must point at the feature branch for a full
-preview.
+cluster. The root `home-server` Application's revision is changed by
+`.github/scripts/set-argocd-revision.sh`; child Applications use
+`source.targetRevision` from the selected branch's `bootstrap/values.yaml`.
+Both must point at the feature branch for a full preview.
 
 ## Before Starting
 
@@ -21,12 +20,6 @@ target revision (the branch, not the synced commit SHA) and the original
 `source.targetRevision` on `main` (not the current feature branch) for cleanup.
 If another preview is active or the baseline is unclear, stop and coordinate
 before changing the cluster.
-
-Have `helm` and an authenticated Argo CD CLI with administrator or
-`personal-cli-admin` permissions available. For the public endpoint, set
-`ARGOCD_OPTS=--grpc-web`; see [the README](../../../README.md) for login and
-Keychain-backed token setup. Never put tokens in commands, commits, or skill
-files.
 
 ## Branch Preparation
 
