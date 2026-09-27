@@ -9,8 +9,10 @@ metadata:
   name: {{ $application }}
   namespace: argocd
   {{- if hasKey $overrides "finalizers" }}
+  {{- if $overrides.finalizers }}
   finalizers:
     {{- toYaml $overrides.finalizers | nindent 4 }}
+  {{- end }}
   {{- else }}
   finalizers:
     - resources-finalizer.argocd.argoproj.io
