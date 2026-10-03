@@ -1,0 +1,10 @@
+{{- $icons := .Files.Glob "icons/*.svg" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-icons
+  namespace: {{ .Release.Namespace }}
+binaryData:
+{{- range $path, $_ := $icons }}
+  {{ base $path }}: {{ $.Files.Get $path | b64enc }}
+{{- end }}

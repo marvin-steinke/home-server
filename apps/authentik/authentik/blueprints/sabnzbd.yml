@@ -31,6 +31,7 @@ entries:
       name: SABnzbd
       provider: !KeyOf sabnzbd-provider
       meta_launch_url: https://sabnzbd.bobby-dev.de
+      meta_icon: icons/sabnzbd.svg
       policy_engine_mode: any
   - model: authentik_policies.policybinding
     identifiers:

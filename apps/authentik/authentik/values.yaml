@@ -4,6 +4,14 @@ authentik:
     envFrom:
       - secretRef:
           name: authentik-external
+    volumes:
+      - name: authentik-icons
+        configMap:
+          name: authentik-icons
+    volumeMounts:
+      - name: authentik-icons
+        mountPath: /data/media/public/icons
+        readOnly: true
     securityContext:
       runAsUser: 2000
       runAsGroup: 2000

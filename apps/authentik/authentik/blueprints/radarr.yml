@@ -31,6 +31,7 @@ entries:
       name: Radarr
       provider: !KeyOf radarr-provider
       meta_launch_url: https://radarr.bobby-dev.de
+      meta_icon: icons/radarr.svg
       policy_engine_mode: any
   - model: authentik_policies.policybinding
     identifiers:

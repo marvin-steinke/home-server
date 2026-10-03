@@ -31,6 +31,7 @@ entries:
       name: Bazarr
       provider: !KeyOf bazarr-provider
       meta_launch_url: https://bazarr.bobby-dev.de
+      meta_icon: icons/bazarr.svg
       policy_engine_mode: any
   - model: authentik_policies.policybinding
     identifiers:
