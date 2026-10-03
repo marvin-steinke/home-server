@@ -31,6 +31,7 @@ entries:
       name: Seerr
       provider: !KeyOf seerr-provider
       meta_launch_url: https://seerr.bobby-dev.de
+      meta_icon: icons/seerr.svg
       open_in_new_tab: true
       policy_engine_mode: any
   - model: authentik_policies.policybinding

@@ -35,6 +35,7 @@ entries:
     attrs:
       name: Argo CD
       provider: !KeyOf argocd-provider
+      meta_icon: icons/argo-cd.svg
       policy_engine_mode: any
   - model: authentik_policies_expression.expressionpolicy
     id: argocd-access-policy

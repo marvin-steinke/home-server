@@ -175,6 +175,24 @@ for its proxy provider, application, and `akadmin` binding. The
 `embedded-outpost` blueprint applies all six media blueprints before assigning
 their providers to the embedded outpost.
 
+### Application Icons
+
+The seven dashboard application icons are stored in
+`apps/authentik/authentik/icons/` and packaged into the `authentik-icons`
+ConfigMap. They come from the [Homarr Labs dashboard-icons
+repository](https://github.com/homarr-labs/dashboard-icons/tree/adca944175c9a3eb0471f78a4da87f237476d585/svg)
+at commit `adca944175c9a3eb0471f78a4da87f237476d585`; the Apache-2.0 license is
+retained alongside the assets in
+[`icons/LICENSE`](../apps/authentik/authentik/icons/LICENSE).
+
+The chart mounts the ConfigMap read-only at
+`/data/media/public/icons` in both the server and worker. Application
+blueprints refer to each file with a relative `meta_icon` path such as
+`icons/radarr.svg`. To update an icon, replace its SVG in the chart's `icons/`
+directory and sync the Authentik Argo CD application. These files are
+read-only; managing uploads through Authentik's Files interface would require
+separate writable persistent media storage.
+
 Proxy provider client credentials are managed by Authentik. Matching existing
 provider names adopts the providers without rotating their client IDs or
 secrets; application slugs are also preserved. Removing the old combined
