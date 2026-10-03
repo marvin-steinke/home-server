@@ -35,35 +35,11 @@ sudo systemctl restart nfs-kernel-server
 sudo systemctl enable nfs-kernel-server
 ```
 
-### Setup PostgreSQL
+### Authentik Server Prerequisites
 
-```bash
-sudo apt install postgresql
-sudo -u postgres psql
-```
-
-```sql
-CREATE USER authentik WITH PASSWORD 'your_password';
-CREATE DATABASE authentik OWNER authentik;
-\c authentik
-GRANT ALL ON SCHEMA public TO authentik;
-ALTER SCHEMA public OWNER TO authentik;
-\q
-```
-
-```bash
-# edit postgresql.conf
-sudo vim /etc/postgresql/{version}/main/postgresql.conf
-# change:
-listen_addresses = '*'
-
-# edit pg_hba.conf
-sudo vim /etc/postgresql/{version}/main/pg_hba.conf
-# add the following line to allow connections from the k3s cluster (adjust the IP range if needed):
-# host    all             all             10.42.0.0/16            scram-sha-256
-
-sudo systemctl restart postgresql
-```
+Authentik uses PostgreSQL on `192.168.2.117`. See the
+[server-level installation guide](docs/authentik.md#server-level-installation)
+for database setup and PostgreSQL network configuration.
 
 
 ### Setup Argo CD
@@ -73,29 +49,11 @@ Argo CD is managed by the local Helm wrapper at
 adopts the existing standard Argo CD v3.5.1 installation with upstream chart
 `argo-cd` v10.4.0.
 
-Before syncing the Authentik or Argo CD applications, create the shared OIDC
-client secret in the Infisical project used by the `infisical` ClusterSecretStore.
-Use the project's UUID, not its slug, and preserve an existing value so both
-ExternalSecrets continue to reference the same client secret. `secrets set` is
-an upsert: run the following only after confirming that
-`ARGOCD_OIDC_CLIENT_SECRET` does not already exist in that project, environment,
-and path.
-
-```bash
-secret="$(openssl rand -base64 48)"
-infisical secrets set "ARGOCD_OIDC_CLIENT_SECRET=$secret" \
-  --projectId=<infisical-project-uuid> \
-  --env=default \
-  --path=/ \
-  --silent
-unset secret
-```
-
-The secret is materialized as `argocd-oidc` in the `authentik` namespace for
-the worker blueprint and in the `argocd` namespace for Argo CD. The Authentik
-blueprint provisions the confidential `argocd` client with callback
-`https://argocd.bobby-dev.de/auth/callback` and restricts application access to
-the `akadmin` user.
+Before syncing the Authentik or Argo CD applications, follow the
+[Authentik Kubernetes installation guide](docs/authentik.md#kubernetes-level-installation)
+to configure the shared OIDC client secret and other required Infisical values.
+Preserve any existing `ARGOCD_OIDC_CLIENT_SECRET`; do not overwrite it during
+an upgrade.
 
 Argo CD manages its own application with automated self-healing enabled, but
 automatic prune and deletion are explicitly disabled. This is intentional:
@@ -103,14 +61,8 @@ review and apply all resource removal or replacement operations separately,
 especially when adopting existing resources with immutable selectors. The
 application uses server-side apply for this reason.
 
-Validate the prerequisite rollout before exposing the Argo CD application:
-
-```bash
-kubectl -n authentik get externalsecret argocd-oidc
-kubectl -n authentik get secret argocd-oidc
-kubectl -n authentik logs deploy/authentik-worker
-curl --fail https://authentik.bobby-dev.de/application/o/argocd/.well-known/openid-configuration
-```
+For Authentik ExternalSecret, blueprint, and OIDC endpoint checks, see
+[Verify Installation](docs/authentik.md#verify-installation).
 
 After Argo CD is reconciled, sign in at `https://argocd.bobby-dev.de` through
 Authentik. Native CLI access through the public Traefik endpoint requires
@@ -182,6 +134,11 @@ diagnosing Authentik, ingress, certificate, or OIDC configuration. Do not
 delete the Argo CD namespace, CRDs, or Helm-managed resources as a recovery
 step.
 
+### Authentik
+
+See the [Authentik guide](docs/authentik.md) for host and Kubernetes
+installation, blueprint-managed applications, verification, and recovery.
+
 Upon installing the cert-manager, I'm usually having some trouble with the
 cainjector health at some point. A restart of the node helps, not sure why.
 
@@ -205,6 +162,8 @@ above, then use Helm from an administration machine with cluster access.
 Before issuing certificates, point the required DNS names at the Traefik entry
 point and make TCP ports 80 and 443 reachable. Populate every Infisical secret
 referenced by the enabled applications before their ExternalSecrets reconcile.
+See [Authentik Kubernetes prerequisites](docs/authentik.md#kubernetes-level-installation)
+for its required keys.
 
 Install the controllers that provide the CRDs used by the Argo CD wrapper, then
 verify the Infisical store before installing Argo CD:
@@ -223,9 +182,10 @@ helm upgrade --install cert-manager apps/cert-manager/cert-manager \
 kubectl wait --for=condition=Ready clustersecretstore/infisical --timeout=5m
 ```
 
-Create `ARGOCD_OIDC_CLIENT_SECRET` in Infisical as described in [Setup Argo
-CD](#setup-argo-cd), then perform the one-time Argo CD installation and hand
-application management to the bootstrap chart:
+Complete the Authentik Infisical prerequisites in the
+[Kubernetes installation guide](docs/authentik.md#kubernetes-level-installation),
+then perform the one-time Argo CD installation and hand application management
+to the bootstrap chart:
 
 ```bash
 helm upgrade --install argocd apps/argocd/argocd \

@@ -17,7 +17,7 @@ authentik:
 
   blueprints:
     configMaps:
-      - argocd-blueprint
+      - authentik-blueprints
 
   worker:
     envFrom:
