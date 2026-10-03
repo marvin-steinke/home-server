@@ -182,6 +182,28 @@ diagnosing Authentik, ingress, certificate, or OIDC configuration. Do not
 delete the Argo CD namespace, CRDs, or Helm-managed resources as a recovery
 step.
 
+### Authentik Applications
+
+The Authentik chart's `applications-blueprint` manages the existing Radarr,
+Sonarr, Bazarr, SABnzbd, Prowlarr, and Seerr proxy applications, their
+`akadmin` access bindings, and their assignments to the embedded outpost.
+Argo CD remains in its separate OIDC blueprint. Proxy client credentials are
+managed internally by Authentik: adopting these providers leaves their current
+client IDs and secrets unchanged, while a new installation generates new ones.
+No additional Infisical keys are needed for these proxy applications.
+
+Before syncing this chart, confirm there is a restorable Authentik PostgreSQL
+backup. From the repository root, validate the chart with
+`helm dependency build apps/authentik/authentik`,
+`helm lint apps/authentik/authentik`, and
+`helm template authentik apps/authentik/authentik --namespace authentik`.
+After Argo CD syncs it, check the `applications` blueprint instance and worker
+logs for errors. Confirm the six applications still point to their existing
+providers, the embedded outpost has all six providers, and sign-in works for
+each application and Argo CD. Removing a blueprint does not undo changes it
+already applied; correct or disable it before restoring affected data from the
+backup.
+
 Upon installing the cert-manager, I'm usually having some trouble with the
 cainjector health at some point. A restart of the node helps, not sure why.
 
