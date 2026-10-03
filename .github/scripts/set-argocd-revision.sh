@@ -13,5 +13,4 @@ fi
 
 revision="$1"
 argocd app set home-server --revision "$revision"
-argocd app sync home-server --timeout 900
 argocd app wait home-server --sync --health --timeout 900
