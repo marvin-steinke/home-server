@@ -1,0 +1,11 @@
+{{- $blueprints := .Files.Glob "blueprints/*.yml" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-blueprints
+  namespace: {{ .Release.Namespace }}
+data:
+{{- range $path, $_ := $blueprints }}
+  {{ trimSuffix ".yml" (base $path) }}.yaml: |
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}

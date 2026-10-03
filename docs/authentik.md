@@ -6,9 +6,11 @@ This repository runs Authentik in Kubernetes and uses PostgreSQL on the home
 server as its external database. Infisical supplies the persistent Authentik
 key, database password, and Argo CD OIDC client secret through External Secrets.
 Argo CD deploys the local Helm wrapper chart; Traefik exposes Authentik at
-`https://authentik.bobby-dev.de`. The Authentik worker loads two mounted
-blueprints: one configures Argo CD OIDC, and the other manages the six media
-proxy applications and their embedded-outpost membership.
+`https://authentik.bobby-dev.de`. The Authentik worker loads eight blueprint
+files from one ConfigMap: one configures Argo CD OIDC, one manages each of the
+six media proxy applications, and one manages their shared embedded-outpost
+membership. Source files use `.yml`; ConfigMap keys use `.yaml`, the suffix the
+upstream chart discovers.
 
 The server-level steps below prepare PostgreSQL; they do not install a second,
 host-native Authentik instance. General k3s, NFS, External Secrets Operator,
@@ -115,12 +117,13 @@ replace the host's backup and restore procedure.
 
 The `apps/authentik/authentik` wrapper chart pins upstream Authentik
 `2025.12.4`. Its values configure the external PostgreSQL host, Traefik ingress,
-worker secret environment, and the two blueprint ConfigMaps. The
-`authentik-external` ExternalSecret maps `AUTHENTIK_KEY` and `POSTGRESQL_PW` to
-`authentik-external`; the `argocd-oidc` ExternalSecret supplies
-`ARGOCD_OIDC_CLIENT_SECRET` to the Authentik worker. The Argo CD wrapper also
-creates `argocd-oidc` in the `argocd` namespace for the Argo CD server.
-The `argocd` blueprint provisions a confidential client with callback
+worker secret environment, and one ConfigMap containing all eight blueprint
+files. The `authentik-external` ExternalSecret maps `AUTHENTIK_KEY` and
+`POSTGRESQL_PW` to `authentik-external`; the `argocd-oidc` ExternalSecret
+supplies `ARGOCD_OIDC_CLIENT_SECRET` to the Authentik worker. The Argo CD
+wrapper also creates `argocd-oidc` in the `argocd` namespace for the Argo CD
+server.
+The `argocd-oidc` blueprint provisions a confidential client with callback
 `https://argocd.bobby-dev.de/auth/callback` and restricts application access to
 the `akadmin` user.
 
@@ -142,7 +145,7 @@ after the chart change is committed and available to its configured revision.
 ### Verify Installation
 
 Check that External Secrets resolved, the workloads are ready, and the worker
-applied both blueprints:
+applied all eight blueprints:
 
 ```bash
 kubectl -n authentik get externalsecret,secret
@@ -152,30 +155,37 @@ kubectl -n authentik logs deploy/authentik-worker --since=30m | grep -Ei 'bluepr
 curl --fail https://authentik.bobby-dev.de/application/o/argocd/.well-known/openid-configuration
 ```
 
-In the Authentik admin interface, confirm the `argocd` and `applications`
-blueprint instances are successful. Confirm the six proxy applications point
-to their providers and are assigned to the embedded outpost. Complete an Argo CD
-OIDC sign-in and test sign-in to each proxy application. For an existing
+In the Authentik admin interface, confirm the `argocd-oidc`, `radarr`, `sonarr`,
+`bazarr`, `sabnzbd`, `prowlarr`, `seerr`, and `embedded-outpost` blueprint
+instances are successful. Confirm the six proxy applications point to their
+providers and are assigned to the embedded outpost. Complete an Argo CD OIDC
+sign-in and test sign-in to each proxy application. For an existing
 installation, compare application/provider identities with the pre-sync state;
 blueprints match applications by slug and providers by name to adopt them rather
 than create duplicates.
 
 ## Blueprint Operations
 
-The `applications` blueprint manages Radarr, Sonarr, Bazarr, SABnzbd, Prowlarr,
-and Seerr, their `akadmin` bindings, and their embedded-outpost assignments.
-The separate `argocd` blueprint manages Argo CD's OIDC provider and application.
+The chart stores source blueprints under
+`apps/authentik/authentik/blueprints/` and renders them as `.yaml` keys in the
+`authentik-blueprints` ConfigMap. The `argocd-oidc` blueprint manages Argo CD's
+OIDC provider, application, and access policy. Each media application has its
+own blueprint (`radarr`, `sonarr`, `bazarr`, `sabnzbd`, `prowlarr`, or `seerr`)
+for its proxy provider, application, and `akadmin` binding. The
+`embedded-outpost` blueprint applies all six media blueprints before assigning
+their providers to the embedded outpost.
+
 Proxy provider client credentials are managed by Authentik. Matching existing
 provider names adopts the providers without rotating their client IDs or
-secrets; deleting and recreating a provider generates new credentials. No
-additional Infisical keys are needed for these proxy applications.
+secrets; application slugs are also preserved. Removing the old combined
+blueprint files does not undo objects they applied. No additional Infisical
+keys are needed for these proxy applications.
 
-Removing a blueprint does not undo changes it already applied. Before deleting
-or changing Authentik data, confirm a restorable database backup and review the
-objects the blueprint manages. To force a reapply after deleting an object,
-queue the mounted blueprint directly; ordinary discovery skips an unchanged
-file. This command reapplies the full six-application blueprint, not only the
-deleted application's entries:
+Before deleting or changing Authentik data, confirm a restorable database
+backup and review the objects the blueprint manages. To force a reapply after
+deleting an object, queue the corresponding mounted blueprint directly;
+ordinary discovery skips an unchanged file. For example, this reapplies only
+Radarr's provider, application, and binding:
 
 ```bash
 kubectl -n authentik exec deploy/authentik-worker -- ak shell -c '
@@ -183,13 +193,16 @@ from authentik.blueprints.models import BlueprintInstance
 from authentik.blueprints.v1.tasks import apply_blueprint
 
 instance = BlueprintInstance.objects.get(
-    path="mounted/cm-applications-blueprint/applications.yaml"
+  path="mounted/cm-authentik-blueprints/radarr.yaml"
 )
 message = apply_blueprint.send(instance.pk)
 print("queued", message.message_id)
 '
 ```
 
-Wait for the `applications` blueprint instance to return to `successful` and
-check worker logs before considering recovery complete. A deleted object is
-created anew and may receive a new database ID.
+Use `argocd.yaml`, `sonarr.yaml`, `bazarr.yaml`, `sabnzbd.yaml`,
+`prowlarr.yaml`, or `seerr.yaml` to reapply another application. Reapplying
+`embedded-outpost.yaml` reapplies its six application dependencies before
+updating outpost membership. Wait for the corresponding blueprint instance to
+return to `successful` and check worker logs before considering recovery
+complete. A deleted object is created anew and may receive a new database ID.

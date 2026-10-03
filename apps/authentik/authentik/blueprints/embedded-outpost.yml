@@ -1,0 +1,49 @@
+version: 1
+metadata:
+  name: embedded-outpost
+  labels:
+    blueprints.goauthentik.io/instantiate: "true"
+entries:
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: bazarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: radarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: sonarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: sabnzbd
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: prowlarr
+      required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: seerr
+      required: true
+  - model: authentik_outposts.outpost
+    identifiers:
+      managed: goauthentik.io/outposts/embedded
+    attrs:
+      name: authentik Embedded Outpost
+      type: proxy
+      providers:
+        - !Find [authentik_providers_proxy.proxyprovider, [name, Provider for Bazarr]]
+        - !Find [authentik_providers_proxy.proxyprovider, [name, Provider for Radarr]]
+        - !Find [authentik_providers_proxy.proxyprovider, [name, Provider for Sonarr]]
+        - !Find [authentik_providers_proxy.proxyprovider, [name, Provider for SABnzbd]]
+        - !Find [authentik_providers_proxy.proxyprovider, [name, Provider for Prowlarr]]
+        - !Find [authentik_providers_proxy.proxyprovider, [name, Provider for Seerr]]
