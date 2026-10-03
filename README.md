@@ -107,9 +107,10 @@ unset ARGOCD_AUTH_TOKEN
 
 After the `github-actions` RBAC change has reconciled, open **Actions > Set Argo
 CD revision > Run workflow** and select a trusted branch. The workflow uses
-that branch as the root `home-server` Application's revision, syncs it, and
-waits for it to become healthy. The workflow must be on the repository's
-default branch before it appears in GitHub Actions.
+that branch as the root `home-server` Application's revision. Argo CD's
+automated sync applies it, and the workflow waits for the application to become
+synced and healthy. The workflow must be on the repository's default branch
+before it appears in GitHub Actions.
 
 For a local update, authenticate with `personal-cli-admin` or an administrator
 and run from the repository root:

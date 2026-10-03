@@ -56,8 +56,9 @@ From the repository root, use the script (not GitHub Actions or a manual
 .github/scripts/set-argocd-revision.sh <feature-name>
 ```
 
-The script sets, syncs, and waits for the root Application. It does not wait
-for child Applications. Check affected children with
+The script changes the root revision and waits for Argo CD's automated sync;
+do not start a parallel manual sync. It does not wait for child Applications.
+Check affected children with
 `argocd app get <application>` to confirm their target revision, then run
 `argocd app wait <application> --sync --health --timeout 900` for each affected
 child. Investigate an unhealthy or out-of-sync child before accepting the
