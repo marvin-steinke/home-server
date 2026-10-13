@@ -50,6 +50,17 @@ pod-gateway:
             tag: v3.12.0
             pullPolicy: IfNotPresent
 
+  persistence:
+    dns-trust-anchors:
+      type: configMap
+      name: '{{ .Release.Name }}-dns-trust-anchors'
+      advancedMounts:
+        main:
+          main:
+            - path: /usr/share/dnsmasq/trust-anchors.conf
+              subPath: trust-anchors.conf
+              readOnly: true
+
   networkpolicies:
     main:
       enabled: true
