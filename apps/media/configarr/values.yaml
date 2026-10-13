@@ -1,0 +1,37 @@
+app-template:
+  controllers:
+    configarr:
+      type: cronjob
+      cronjob:
+        schedule: "0 * * * *"
+        timeZone: Etc/UTC
+        concurrencyPolicy: Forbid
+        startingDeadlineSeconds: 600
+        backoffLimit: 1
+        successfulJobsHistory: 1
+        failedJobsHistory: 3
+      containers:
+        configarr:
+          image:
+            repository: ghcr.io/raydak-labs/configarr
+            tag: "1.33.0"
+            pullPolicy: IfNotPresent
+          tty: true
+          env:
+            TZ: Etc/UTC
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 1Gi
+
+  persistence:
+    repos:
+      type: persistentVolumeClaim
+      accessMode: ReadWriteOnce
+      size: 1Gi
+      storageClass: config
+      retain: true
+      globalMounts:
+        - path: /app/repos
