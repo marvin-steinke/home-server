@@ -1,8 +1,10 @@
-{{- range (index .Values "pod-gateway").routed_namespaces }}
+{{- range .Values.global.podroute.namespaces }}
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ . }}
   labels:
     routed-gateway: "true"
+    podroute.io/routed: "true"
+---
 {{- end }}

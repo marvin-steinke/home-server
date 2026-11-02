@@ -42,6 +42,12 @@ namespaces:
       - traefik
   - name: vpn-gateway
     wave: -2
+    ignoreDifferences:
+      - group: admissionregistration.k8s.io
+        kind: MutatingWebhookConfiguration
+        name: podroute
+        jsonPointers:
+          - /webhooks/0/clientConfig/caBundle
     apps:
       - vpn-gateway
   - name: vpn

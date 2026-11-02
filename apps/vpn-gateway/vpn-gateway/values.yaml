@@ -1,23 +1,85 @@
-pod-gateway:
+global:
+  podroute:
+    webhookEnabled: true
+    helperImage: ghcr.io/marvin-steinke/podroute-gateway@sha256:f999795f4000f26463bf61bb833b78e5dd6fb0410b7e9dc29e9df39ad85aedf0
+    namespaces:
+      - vpn
+    nativeSidecar: true
+    network:
+      gatewayHost: podroute-gateway.vpn-gateway.svc.cluster.local
+      overlayCIDR: 172.16.1.0/24
+      vxlanID: 42
+      vxlanPort: 4789
+      vpnInterface: wg0
+      vpnProtocol: udp
+      vpnPort: 51820
+      vpnEndpointCIDRs: []
+      clientBypassCIDRs:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+      gatewayBypassCIDRs:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+      clusterDNS:
+        - 10.43.0.10
+      upstreamDNS:
+        - 1.1.1.1
+        - 9.9.9.9
+      clusterDomain: cluster.local
+      localDomains:
+        - local
+      dnssec: true
+      dhcpStart: 20
+      mtu: 1320
+      retrySeconds: 10
+      staticClients: []
+
+app-template:
   controllers:
-    main:
-      containers:
-        main:
+    gateway:
+      forceRename: podroute-gateway
+      replicas: 1
+      strategy: Recreate
+      pod:
+        labels:
+          podroute.io/role: gateway
+        annotations:
+          checksum/network: '{{ .Values.global.podroute.network | toJson | sha256sum }}'
+        nodeSelector:
+          kubernetes.io/arch: amd64
+        securityContext:
+          sysctls:
+            - name: net.ipv4.ip_forward
+              value: "1"
+      initContainers:
+        routes:
           image:
-            repository: ghcr.io/angelnu/pod-gateway
-            tag: v1.13.0
-            pullPolicy: IfNotPresent
+            repository: ghcr.io/marvin-steinke/podroute-gateway
+            tag: 1.0.0@sha256:f999795f4000f26463bf61bb833b78e5dd6fb0410b7e9dc29e9df39ad85aedf0
+          args:
+            - gateway-init
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_ADMIN
+                - NET_RAW
+      containers:
         gluetun:
-          enabled: true
-          dependsOn: main
           image:
             repository: docker.io/qmcgaw/gluetun
             tag: v3.41.3
-            pullPolicy: IfNotPresent
           env:
             VPN_SERVICE_PROVIDER: mullvad
             VPN_TYPE: wireguard
-            VPN_INTERFACE: &vpn-interface wg0
+            VPN_INTERFACE: wg0
             FIREWALL: "off"
             DOT: "off"
             SERVER_CITIES: Amsterdam
@@ -33,27 +95,149 @@ pod-gateway:
                   command:
                     - sh
                     - -c
-                    - if [ $(wget -q -O- https://ipinfo.io/country) == 'NL' ]; then exit 0; else exit $?; fi
+                    - test "$(wget -T 10 -q -O- https://ipinfo.io/country)" = NL
                 initialDelaySeconds: 30
                 periodSeconds: 60
+                timeoutSeconds: 15
                 failureThreshold: 3
+            readiness:
+              enabled: true
+              custom: true
+              spec:
+                exec:
+                  command:
+                    - sh
+                    - -c
+                    - wget -T 3 -q -O /dev/null http://127.0.0.1:9999/
+                timeoutSeconds: 5
           securityContext:
             capabilities:
               add:
                 - NET_ADMIN
-
-    webhook:
-      containers:
-        main:
+        routing:
           image:
-            repository: ghcr.io/angelnu/gateway-admision-controller
-            tag: v3.12.0
-            pullPolicy: IfNotPresent
+            repository: ghcr.io/marvin-steinke/podroute-gateway
+            tag: 1.0.0@sha256:f999795f4000f26463bf61bb833b78e5dd6fb0410b7e9dc29e9df39ad85aedf0
+          args:
+            - gateway-sidecar
+          probes:
+            readiness:
+              enabled: true
+              custom: true
+              spec:
+                exec:
+                  command:
+                    - bash
+                    - -c
+                    - test -s /run/podroute/dnsmasq.pid && kill -0 "$(</run/podroute/dnsmasq.pid)"
+                periodSeconds: 5
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_ADMIN
+                - NET_RAW
+                - NET_BIND_SERVICE
+                - SETGID
+    webhook:
+      forceRename: podroute-controller
+      replicas: 1
+      strategy: RollingUpdate
+      pod:
+        annotations:
+          checksum/profile: '{{ omit .Values.global.podroute "webhookEnabled" | toJson | sha256sum }}'
+        nodeSelector:
+          kubernetes.io/arch: amd64
+        securityContext:
+          runAsUser: 65532
+          runAsGroup: 65532
+          runAsNonRoot: true
+      containers:
+        controller:
+          image:
+            repository: ghcr.io/marvin-steinke/podroute-controller
+            tag: 1.0.0@sha256:7d11d4d96d09dd8b0c0d423b39e2830f933d6bcfa815b6e2b0d2b2f7b2abc79e
+          args:
+            - --config=/etc/podroute/controller.json
+            - --listen=:8443
+            - --tls-cert=/etc/podroute/tls/tls.crt
+            - --tls-key=/etc/podroute/tls/tls.key
+          probes:
+            liveness: &controller-health
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  scheme: HTTPS
+                  path: /healthz
+                  port: 8443
+            readiness: *controller-health
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+  service:
+    gateway:
+      forceRename: podroute-gateway
+      controller: gateway
+      clusterIP: None
+      publishNotReadyAddresses: true
+      ports:
+        vxlan:
+          port: 4789
+          protocol: UDP
+    webhook:
+      forceRename: podroute-controller
+      controller: webhook
+      ports:
+        https:
+          port: 443
+          targetPort: 8443
+
+  persistence:
+    configuration:
+      type: configMap
+      name: podroute
+      advancedMounts:
+        gateway:
+          routes:
+            - path: /etc/podroute
+              readOnly: true
+          routing:
+            - path: /etc/podroute
+              readOnly: true
+        webhook:
+          controller:
+            - path: /etc/podroute
+              readOnly: true
+    state:
+      type: emptyDir
+      advancedMounts:
+        gateway:
+          routes:
+            - path: /run/podroute
+          routing:
+            - path: /run/podroute
+    tls:
+      type: secret
+      name: podroute-controller-tls
+      advancedMounts:
+        webhook:
+          controller:
+            - path: /etc/podroute/tls
+              readOnly: true
 
   networkpolicies:
-    main:
-      enabled: true
-      controller: main
+    gateway:
+      controller: gateway
       policyTypes:
         - Egress
       rules:
@@ -62,18 +246,14 @@ pod-gateway:
               - ipBlock:
                   cidr: 0.0.0.0/0
             ports:
-              - port: &vpn-port 51820
+              - port: 51820
                 protocol: UDP
           - to:
               - namespaceSelector: {}
-
-  DNS: 172.16.1.1
-  routed_namespaces:
-    - vpn
-  settings:
-    VXLAN_IP_NETWORK: "172.16.1"
-    VPN_INTERFACE: *vpn-interface
-    VPN_BLOCK_OTHER_TRAFFIC: true
-    VPN_TRAFFIC_PORT: *vpn-port
-    NOT_ROUTED_TO_GATEWAY_CIDRS: &local-cidrs "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
-    VPN_LOCAL_CIDRS: *local-cidrs
+          - to:
+              - ipBlock:
+                  cidr: 10.0.0.0/8
+              - ipBlock:
+                  cidr: 172.16.0.0/12
+              - ipBlock:
+                  cidr: 192.168.0.0/16
