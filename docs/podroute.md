@@ -69,6 +69,13 @@ null values in Helm overrides are removed during value merging. Keep the root
 paused while changing live child policies so parent self-heal cannot undo them.
 Remove the temporary overrides after the controlled cutover is verified.
 
+When returning a preview to the baseline, pause root/child reconciliation and
+stop consumers before replacing the webhook and gateway. A temporary ResourceQuota
+in `vpn` with `pods: "0"` prevents automatic reconciliation from creating Pods
+during the admission gap. Keep it until the baseline gateway and webhook are
+healthy, then remove it so consumers are recreated with the baseline helpers.
+Verify consumer health and remove all temporary maintenance controls before merge.
+
 ### Preview Verification: 2026-11-02
 
 The `podroute-migration` branch was deployed without merging its pull request.
@@ -88,6 +95,13 @@ Live checks verified:
 The canary and temporary firewall rules were removed after testing. Certificate
 renewal itself was not forced; controller restart and subsequent TLS-backed
 admission were tested. The token-mount reinvocation limitation above remains.
+
+Preview cleanup restored the root and all child Applications to `main`
+(`35f1353`) and Synced status. The operator confirmed that the baseline VPN
+trust anchors are out of date, so working routing on `main` is not an acceptance
+criterion for this cleanup. Prowlarr and SABnzbd startup probes were failing
+after restoration; baseline VPN health must not be reported as verified.
+The temporary Pod quota was removed and normal reconciliation restored.
 
 ## Initial Cutover From Angelnu
 
@@ -111,6 +125,9 @@ local `~/.ssh/bobby` key; stop and request operator action if sudo is needed.
    Deployment available. Confirm the serving certificate covers
    `podroute-controller.vpn-gateway.svc`.
 4. Scale Prowlarr and SABnzbd to zero and wait for their Pods to terminate.
+   A temporary `pods: "0"` ResourceQuota in `vpn` guards against unexpected Pod
+   creation while admission is being replaced; remove it only after the new
+   fail-closed webhook is ready, before creating the canary or consumers.
    Remove `MutatingWebhookConfiguration/vpn-gateway-pod-gateway`, stop the old
    `vpn-gateway-pod-gateway-main` gateway, and wait for it to terminate before
    starting the new gateway. Never run both gateways on this overlay.
