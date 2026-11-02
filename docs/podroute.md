@@ -27,6 +27,16 @@ Exactly one gateway may be active for this overlay. Its Deployment uses
 The helpers run as root with restricted capabilities, not privileged mode.
 Native sidecars require a compatible Kubernetes version and admission policy.
 
+Podroute 1.0.0 rejects reinvocation when Kubernetes adds service-account token
+mounts to its helpers. The existing app-template consumers already set
+`automountServiceAccountToken: false`; retain that setting. Diagnostic Pods in
+`vpn` must set it explicitly too. Do not add token-dependent workloads to this
+namespace until that controller compatibility issue is fixed.
+
+Gateway liveness and consumer startup probes require `loc=NL` from Cloudflare's
+HTTPS trace endpoint. The previous ipinfo endpoint returned HTTP 429 for the
+shared VPN exit and prevented otherwise healthy applications from starting.
+
 ## Validate Changes
 
 From the repository root:
@@ -42,6 +52,22 @@ Confirm gateway and controller JSON match, the webhook selects only `vpn`,
 the gateway init runs before Gluetun, and the Service remains headless.
 Network/profile changes roll the gateway/controller using checksums. Existing
 consumer Pods retain their injected profile: recreate them after a change.
+
+## Feature Branch Preview
+
+Follow `.github/skills/feature-branch-testing/SKILL.md`. Record the original
+root revision and `main`'s child revision, then set `source.targetRevision` in
+the feature branch to its exact name. Validate and push before running
+`.github/scripts/set-argocd-revision.sh <branch>`; do not merge to deploy a
+preview or start a parallel root sync. Wait for each affected child's sync
+and health separately. Restore the recorded baseline before any future merge.
+
+During maintenance, `applicationOverrides.<app>.automated: false` renders
+`spec.syncPolicy.automated: null`. This is intentional: the deployed controller
+continued automatic synchronization with `automated.enabled: false`. Plain
+null values in Helm overrides are removed during value merging. Keep the root
+paused while changing live child policies so parent self-heal cannot undo them.
+Remove the temporary overrides after the controlled cutover is verified.
 
 ## Initial Cutover From Angelnu
 
