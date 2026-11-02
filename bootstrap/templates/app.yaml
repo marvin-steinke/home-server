@@ -37,8 +37,12 @@ spec:
     targetRevision: {{ $.Values.source.targetRevision }}
   syncPolicy:
     {{- if hasKey $overrides "automated" }}
+    {{- if eq (toString $overrides.automated) "false" }}
+    automated: null
+    {{- else }}
     automated:
       {{- toYaml $overrides.automated | nindent 6 }}
+    {{- end }}
     {{- else }}
     automated:
       prune: true
