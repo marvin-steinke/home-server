@@ -6,20 +6,11 @@ source:
 
 applicationOverrides:
   vpn-gateway:
-    automated:
-      enabled: false
-      prune: true
-      selfHeal: true
+    automated: false
   prowlarr:
-    automated:
-      enabled: false
-      prune: true
-      selfHeal: true
+    automated: false
   sabnzbd:
-    automated:
-      enabled: false
-      prune: true
-      selfHeal: true
+    automated: false
   argocd:
     finalizers: []
     annotations:
