@@ -5,12 +5,6 @@ source:
   targetRevision: podroute-migration
 
 applicationOverrides:
-  vpn-gateway:
-    automated: false
-  prowlarr:
-    automated: false
-  sabnzbd:
-    automated: false
   argocd:
     finalizers: []
     annotations:

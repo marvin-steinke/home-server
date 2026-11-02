@@ -69,6 +69,26 @@ null values in Helm overrides are removed during value merging. Keep the root
 paused while changing live child policies so parent self-heal cannot undo them.
 Remove the temporary overrides after the controlled cutover is verified.
 
+### Preview Verification: 2026-11-02
+
+The `podroute-migration` branch was deployed without merging its pull request.
+Helm lint/render checks passed for bootstrap, gateway, Prowlarr and SABnzbd.
+Live checks verified:
+
+- Exactly one gateway endpoint, MTU 1320, and Podroute helpers on both consumers.
+- Cluster/public DNS, Netherlands egress, and private LAN access.
+- Public IPv4 and DNS blocked during gateway removal and VPN-transport loss;
+   private bypasses stayed reachable and traffic recovered after restoration.
+- IPv6 drop rules and no usable public IPv6 egress on this IPv4-only cluster.
+- Selected Pod admission failed closed without the controller; unselected
+   admission remained available and selected admission recovered after restart.
+- Existing LoadBalancer endpoints responded, config PVCs remained bound, and
+   application config/NFS mounts were writable without changing application data.
+
+The canary and temporary firewall rules were removed after testing. Certificate
+renewal itself was not forced; controller restart and subsequent TLS-backed
+admission were tested. The token-mount reinvocation limitation above remains.
+
 ## Initial Cutover From Angelnu
 
 Schedule a short interruption. Verify node architecture, CoreDNS, MTU,
