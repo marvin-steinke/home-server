@@ -1,0 +1,40 @@
+{{- if .Values.global.podroute.webhookEnabled }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: podroute
+  annotations:
+    cert-manager.io/inject-ca-from: {{ printf "%s/podroute-controller" .Release.Namespace | quote }}
+webhooks:
+  - name: pods.podroute.io
+    admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: podroute-controller
+        namespace: {{ .Release.Namespace }}
+        path: /mutate
+        port: 443
+    failurePolicy: Fail
+    reinvocationPolicy: IfNeeded
+    sideEffects: None
+    timeoutSeconds: 5
+    namespaceSelector:
+      matchLabels:
+        podroute.io/routed: "true"
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: In
+          values:
+            {{- toYaml .Values.global.podroute.namespaces | nindent 12 }}
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+        resources:
+          - pods
+        scope: Namespaced
+{{- end }}

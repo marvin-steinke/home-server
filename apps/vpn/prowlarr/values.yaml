@@ -45,7 +45,8 @@ app-template:
                   command:
                     - sh
                     - -c
-                    - if [ $(wget -q -O- https://ipinfo.io/country) == 'NL' ]; then exit 0; else exit $?; fi
+                    - wget -T 10 -q -O- https://www.cloudflare.com/cdn-cgi/trace | grep -qx 'loc=NL'
+                timeoutSeconds: 15
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

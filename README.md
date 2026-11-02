@@ -140,6 +140,11 @@ step.
 See the [Authentik guide](docs/authentik.md) for host and Kubernetes
 installation, blueprint-managed applications, verification, and recovery.
 
+### VPN Gateway
+
+See the [Podroute guide](docs/podroute.md) for VPN routing configuration,
+the Angelnu migration, certificate renewal, verification, and rollback.
+
 Upon installing the cert-manager, I'm usually having some trouble with the
 cainjector health at some point. A restart of the node helps, not sure why.
 
