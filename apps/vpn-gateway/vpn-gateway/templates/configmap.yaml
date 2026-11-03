@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: podroute
+data:
+  controller.json: {{ omit .Values.global.podroute "webhookEnabled" | toJson | quote }}
+  network.json: {{ .Values.global.podroute.network | toJson | quote }}
