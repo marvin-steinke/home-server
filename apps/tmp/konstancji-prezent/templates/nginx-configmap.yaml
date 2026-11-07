@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: konstancji-prezent-nginx
+data:
+  start.sh: |
+    set -eu
+    case "${SECRET_PATH:-}" in
+      *[!0-9a-f]*|'') exit 1 ;;
+    esac
+    [ "${#SECRET_PATH}" -eq 32 ] || exit 1
+    mkdir -p /tmp/www /tmp/nginx
+    ln -sfn /usr/share/nginx/html "/tmp/www/$SECRET_PATH"
+    sed "s/__SECRET_PATH__/$SECRET_PATH/g" /etc/konstancji-prezent/nginx.conf > /tmp/nginx.conf
+    exec nginx -c /tmp/nginx.conf -g 'daemon off;'
+  nginx.conf: |
+    worker_processes auto;
+    pid /tmp/nginx.pid;
+    error_log /dev/stderr crit;
+    events { worker_connections 1024; }
+    http {
+      include /etc/nginx/mime.types;
+      types { text/calendar ics; }
+      default_type application/octet-stream;
+      client_body_temp_path /tmp/nginx/client;
+      proxy_temp_path /tmp/nginx/proxy;
+      fastcgi_temp_path /tmp/nginx/fastcgi;
+      uwsgi_temp_path /tmp/nginx/uwsgi;
+      scgi_temp_path /tmp/nginx/scgi;
+      access_log off;
+      server {
+        listen 8080;
+        server_name _;
+        server_tokens off;
+        absolute_redirect off;
+        root /tmp/www;
+        index index.html;
+        autoindex off;
+        add_header Cache-Control "no-store" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-Robots-Tag "noindex" always;
+        add_header Referrer-Policy "no-referrer" always;
+        location = /__SECRET_PATH__ {
+          return 308 /__SECRET_PATH__/;
+        }
+        location ^~ /__SECRET_PATH__/ {
+          try_files $uri $uri/ =404;
+        }
+        location / {
+          return 404;
+        }
+      }
+    }
