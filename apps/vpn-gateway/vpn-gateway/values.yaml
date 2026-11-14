@@ -57,7 +57,7 @@ app-template:
         routes:
           image:
             repository: ghcr.io/marvin-steinke/podroute-gateway
-            tag: 1.0.0@sha256:f999795f4000f26463bf61bb833b78e5dd6fb0410b7e9dc29e9df39ad85aedf0
+            tag: 1.0.0@sha256:d8ba465473afe857ae536d485ec241522c68d08924d129624896d2837161867f
           args:
             - gateway-init
           securityContext:
@@ -117,7 +117,7 @@ app-template:
         routing:
           image:
             repository: ghcr.io/marvin-steinke/podroute-gateway
-            tag: 1.0.0@sha256:f999795f4000f26463bf61bb833b78e5dd6fb0410b7e9dc29e9df39ad85aedf0
+            tag: 1.0.0@sha256:d8ba465473afe857ae536d485ec241522c68d08924d129624896d2837161867f
           args:
             - gateway-sidecar
           probes:
@@ -161,7 +161,7 @@ app-template:
         controller:
           image:
             repository: ghcr.io/marvin-steinke/podroute-controller
-            tag: 1.0.0@sha256:7d11d4d96d09dd8b0c0d423b39e2830f933d6bcfa815b6e2b0d2b2f7b2abc79e
+            tag: 1.0.0@sha256:2abc737f3ba485faf2d8b456a8f4c6ce6ae7dabb1a4fba5057c892cced80efae
           args:
             - --config=/etc/podroute/controller.json
             - --listen=:8443

@@ -66,6 +66,9 @@ namespaces:
       - bazarr
       - jellyfin
       - seerr
+  - name: tmp
+    apps:
+      - konstancji-prezent
   #- name: minecraft
   #  ignoreDifferences:
   #    - group: apps
