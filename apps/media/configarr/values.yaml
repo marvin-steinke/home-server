@@ -4,7 +4,7 @@ app-template:
       type: cronjob
       cronjob:
         schedule: "0 * * * *"
-        timeZone: Etc/UTC
+        timeZone: Europe/Berlin
         concurrencyPolicy: Forbid
         startingDeadlineSeconds: 600
         backoffLimit: 1
@@ -18,7 +18,7 @@ app-template:
             pullPolicy: IfNotPresent
           tty: true
           env:
-            TZ: Etc/UTC
+            TZ: Europe/Berlin
           resources:
             requests:
               cpu: 50m
