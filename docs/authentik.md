@@ -12,111 +12,27 @@ six media proxy applications, and one manages their shared embedded-outpost
 membership. Source files use `.yml`; ConfigMap keys use `.yaml`, the suffix the
 upstream chart discovers.
 
-The server-level steps below prepare PostgreSQL; they do not install a second,
-host-native Authentik instance. General k3s, NFS, External Secrets Operator,
-and GitOps bootstrap instructions remain in the [root README](../README.md).
+## Installation
 
-## Server-Level Installation
+1. Prepare the database using [server setup](server-setup.md#3-prepare-postgresql-for-authentik).
+2. Follow [Kubernetes setup](kubernetes-setup.md), including its ordered
+   [secret prerequisites](kubernetes-setup.md#secrets-and-creation-order).
+   Authentik needs `AUTHENTIK_KEY`, `POSTGRESQL_PW`, and
+   `ARGOCD_OIDC_CLIENT_SECRET` before its workloads reconcile.
+3. Let the existing `authentik` Argo CD Application deploy the chart; do not
+   install a second Helm release. For a new instance, complete
+   [initial setup](https://docs.goauthentik.io/install-config/install/kubernetes/#access-authentik)
+   at `https://authentik.bobby-dev.de/if/flow/initial-setup/` and secure the
+   `akadmin` account.
 
-Run these steps on the home server that hosts PostgreSQL. The chart currently
-connects to `192.168.2.117`; keep that address and the PostgreSQL listener,
-firewall, and `pg_hba.conf` rules aligned. The examples assume the default k3s
-pod CIDR `10.42.0.0/16`; adjust it if the cluster uses another range.
+Preserve the current database password, `AUTHENTIK_KEY`, and OIDC secret on
+upgrades. Confirm a restorable PostgreSQL backup before adopting or changing
+existing objects.
 
-Install PostgreSQL and create the Authentik role and database:
+### Chart and OIDC
 
-```bash
-sudo apt update
-sudo apt install postgresql
-sudo -u postgres psql
-```
-
-In the PostgreSQL prompt, create the role and database, set the role password
-interactively, then grant schema access:
-
-```sql
-CREATE ROLE authentik WITH LOGIN;
-CREATE DATABASE authentik OWNER authentik;
-\password authentik
-\connect authentik
-GRANT ALL ON SCHEMA public TO authentik;
-ALTER SCHEMA public OWNER TO authentik;
-\q
-```
-
-Store the same password entered by `\password` in Infisical as `POSTGRESQL_PW`.
-Do not put the password in Git or a shell command. For an existing Authentik
-installation, preserve its current database password and `AUTHENTIK_KEY`.
-
-Configure PostgreSQL to listen on the server interface used by the cluster. In
-`/etc/postgresql/<installed-major-version>/main/postgresql.conf`, set:
-
-```conf
-listen_addresses = 'localhost,192.168.2.117'
-```
-
-In `/etc/postgresql/<installed-major-version>/main/pg_hba.conf`, allow the
-cluster pod CIDR to connect to only this database and role:
-
-```conf
-host    authentik    authentik    10.42.0.0/16    scram-sha-256
-```
-
-Ensure the host firewall and network path permit TCP port `5432` from the
-cluster, then restart and check PostgreSQL:
-
-```bash
-sudo systemctl restart postgresql
-sudo systemctl enable postgresql
-sudo systemctl is-active postgresql
-sudo -u postgres pg_isready -h 192.168.2.117 -p 5432
-```
-
-Before changing an existing deployment or adopting existing Authentik objects,
-confirm there is a recent, restorable PostgreSQL backup. This guide does not
-replace the host's backup and restore procedure.
-
-## Kubernetes-Level Installation
-
-### Prerequisites
-
-1. Complete the existing [k3s and network setup](../README.md#installation). DNS
-   for `authentik.bobby-dev.de` must resolve to Traefik, and ports 80 and 443
-   must be reachable for the configured ingress and certificate issuer.
-2. Install the External Secrets Operator and cert-manager using the
-  [controller steps in Bootstrap GitOps](../README.md#bootstrap-gitops)
-   and confirm the `infisical` ClusterSecretStore is Ready. The `letsencrypt`
-   ClusterIssuer must also be Ready.
-3. In the Infisical project used by that ClusterSecretStore, make sure these
-   keys exist in the configured environment and path:
-   - `AUTHENTIK_KEY`: a stable, high-entropy Authentik secret key. Preserve it
-     for an existing installation; changing it can invalidate encrypted data.
-   - `POSTGRESQL_PW`: the password for the `authentik` PostgreSQL role above.
-   - `ARGOCD_OIDC_CLIENT_SECRET`: the shared confidential client secret used
-     by the Authentik Argo CD blueprint and the Argo CD application.
-
-  If `ARGOCD_OIDC_CLIENT_SECRET` does not already exist, create it once using
-  the Infisical project UUID (not its slug), the `default` environment, and
-  root path. Do not rerun this upsert over an existing value:
-
-   ```bash
-   secret="$(openssl rand -base64 48)"
-   infisical secrets set "ARGOCD_OIDC_CLIENT_SECRET=$secret" \
-     --projectId=<infisical-project-uuid> \
-     --env=default \
-     --path=/ \
-     --silent
-   unset secret
-   ```
-
-   Store `AUTHENTIK_KEY` and `POSTGRESQL_PW` in the same Infisical project,
-   environment, and path expected by the `infisical` ClusterSecretStore. Do not
-   print or commit secret values.
-
-### Install and Sync
-
-The `apps/authentik/authentik` wrapper chart pins upstream Authentik
-`2025.12.4`. Its values configure the external PostgreSQL host, Traefik ingress,
+The [wrapper chart](../apps/authentik/authentik/Chart.yaml) pins the upstream
+Authentik version. Its values configure the external PostgreSQL host, Traefik ingress,
 worker secret environment, and one ConfigMap containing all eight blueprint
 files. The `authentik-external` ExternalSecret maps `AUTHENTIK_KEY` and
 `POSTGRESQL_PW` to `authentik-external`; the `argocd-oidc` ExternalSecret
@@ -135,14 +51,10 @@ helm lint apps/authentik/authentik
 helm template authentik apps/authentik/authentik --namespace authentik
 ```
 
-For initial cluster setup, first complete the root README's
-[GitOps bootstrap](../README.md#bootstrap-gitops). That bootstrap registers the
-`authentik` child Application in the `authentik` namespace. Sync and manage it
-through the existing Argo CD Application; do not install a second Helm release
-for Authentik. For an existing cluster, sync the same `authentik` Application
-after the chart change is committed and available to its configured revision.
+Commit chart changes to the Application's configured revision and sync that
+Application through Argo CD.
 
-### Verify Installation
+## Verify Installation
 
 Check that External Secrets resolved, the workloads are ready, and the worker
 applied all eight blueprints:
@@ -150,6 +62,11 @@ applied all eight blueprints:
 ```bash
 kubectl -n authentik get externalsecret,secret
 kubectl -n argocd get externalsecret argocd-oidc
+kubectl -n authentik wait --for=condition=Ready \
+  externalsecret/authentik-external externalsecret/argocd-oidc --timeout=5m
+kubectl -n argocd wait --for=condition=Ready externalsecret/argocd-oidc --timeout=5m
+kubectl -n authentik rollout status deployment/authentik-server --timeout=5m
+kubectl -n authentik rollout status deployment/authentik-worker --timeout=5m
 kubectl -n authentik get pods
 kubectl -n authentik logs deploy/authentik-worker --since=30m | grep -Ei 'blueprint|error'
 curl --fail https://authentik.bobby-dev.de/application/o/argocd/.well-known/openid-configuration
@@ -181,9 +98,8 @@ The seven dashboard application icons are stored in
 `apps/authentik/authentik/icons/` and packaged into the `authentik-icons`
 ConfigMap. They come from the [Homarr Labs dashboard-icons
 repository](https://github.com/homarr-labs/dashboard-icons/tree/adca944175c9a3eb0471f78a4da87f237476d585/svg)
-at commit `adca944175c9a3eb0471f78a4da87f237476d585`; the Apache-2.0 license is
-retained alongside the assets in
-[`icons/LICENSE`](../apps/authentik/authentik/icons/LICENSE).
+at commit `adca944175c9a3eb0471f78a4da87f237476d585` under the upstream
+[Apache-2.0 license](https://github.com/homarr-labs/dashboard-icons/blob/adca944175c9a3eb0471f78a4da87f237476d585/LICENSE).
 
 The chart mounts the ConfigMap read-only at
 `/data/media/public/icons` in both the server and worker. Application
