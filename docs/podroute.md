@@ -4,6 +4,8 @@ The `vpn-gateway` Application deploys Podroute and Gluetun in `vpn-gateway`;
 Podroute injects routing helpers into new Pods in `vpn` (Prowlarr and SABnzbd).
 The controller/gateway must stay outside that namespace.
 
+![Selective VPN routing through Podroute, Gluetun, and Mullvad](../assets/diagrams/vpn-routing.png)
+
 For initial deployment, follow [Kubernetes setup](kubernetes-setup.md). Populate
 the [WireGuard secrets](kubernetes-setup.md#secrets-and-creation-order) before the
 gateway starts; cert-manager creates the internal TLS Secrets automatically.

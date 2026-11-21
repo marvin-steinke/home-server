@@ -19,6 +19,8 @@ Restore persistent data and configure media libraries, indexers, Usenet accounts
 and application integrations separately. The initial Argo CD installation and
 root Application are the manual entry point; subsequent changes go through Git.
 
+![Argo CD GitOps reconciliation and Infisical secret delivery through External Secrets](../assets/diagrams/gitops-and-secrets.png)
+
 ## Prerequisites
 
 - Complete [server setup](server-setup.md), including NFS permissions and the

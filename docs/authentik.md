@@ -12,6 +12,8 @@ six media proxy applications, and one manages their shared embedded-outpost
 membership. Source files use `.yml`; ConfigMap keys use `.yaml`, the suffix the
 upstream chart discovers.
 
+![HTTPS ingress, Authentik dashboard protection, and native application login](../assets/diagrams/access-and-identity.png)
+
 ## Installation
 
 1. Prepare the database using [server setup](server-setup.md#3-prepare-postgresql-for-authentik).

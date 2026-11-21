@@ -24,7 +24,13 @@ The [bootstrap values](bootstrap/values.yaml) are the enabled-application list.
 
 ### Overview
 
-<img width="5320" height="3080" alt="media_setup" src="https://github.com/user-attachments/assets/45e40541-b1e6-4a54-8826-47ada30f384e" />
+![Home server overview](assets/diagrams/overview.png)
+
+Editable source for all diagrams: [arch.pptx](assets/diagrams/arch.pptx).
+
+### Media workflow
+
+![Media requests, downloads, library organisation, and playback](assets/diagrams/media-workflow.png)
 
 ## Setup
 

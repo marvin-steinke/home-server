@@ -4,6 +4,8 @@ Manual preparation for the Debian home server. Complete this before the
 [Kubernetes setup](kubernetes-setup.md); no host-native Authentik installation is
 needed.
 
+![Debian host, Kubernetes workloads, and persistent storage paths](../assets/diagrams/host-and-persistence.png)
+
 ## Host and network
 
 The charts currently assume:
