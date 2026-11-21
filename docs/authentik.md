@@ -98,10 +98,8 @@ The README and Authentik share the SVG icons in
 [`assets/icons/`](../assets/icons/). The chart's
 [`icons/` directory](../apps/authentik/authentik/icons/) contains symlinks to
 the seven Authentik application icons, which are packaged into the
-`authentik-icons` ConfigMap. They come from the [Homarr Labs dashboard-icons
-repository](https://github.com/homarr-labs/dashboard-icons/tree/adca944175c9a3eb0471f78a4da87f237476d585/svg)
-at commit `adca944175c9a3eb0471f78a4da87f237476d585` under the upstream
-[Apache-2.0 license](https://github.com/homarr-labs/dashboard-icons/blob/adca944175c9a3eb0471f78a4da87f237476d585/LICENSE).
+`authentik-icons` ConfigMap. See the [icon credits](../assets/icons/README.md)
+for source and license information.
 
 The chart mounts the ConfigMap read-only at
 `/data/media/public/icons` in both the server and worker. Application

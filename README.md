@@ -36,7 +36,3 @@ The [bootstrap values](bootstrap/values.yaml) are the enabled-application list.
 
 Host provisioning, database/media backups, and application data are not recreated
 by GitOps. See the [reproducibility boundary](docs/kubernetes-setup.md#what-gitops-reproduces).
-
-Application logos are from [Homarr Labs dashboard-icons](https://github.com/homarr-labs/dashboard-icons/tree/adca944175c9a3eb0471f78a4da87f237476d585/svg);
-see their [Apache-2.0 license](https://github.com/homarr-labs/dashboard-icons/blob/adca944175c9a3eb0471f78a4da87f237476d585/LICENSE).
-
