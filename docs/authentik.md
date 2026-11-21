@@ -94,9 +94,11 @@ their providers to the embedded outpost.
 
 ### Application Icons
 
-The seven dashboard application icons are stored in
-`apps/authentik/authentik/icons/` and packaged into the `authentik-icons`
-ConfigMap. They come from the [Homarr Labs dashboard-icons
+The README and Authentik share the SVG icons in
+[`assets/icons/`](../assets/icons/). The chart's
+[`icons/` directory](../apps/authentik/authentik/icons/) contains symlinks to
+the seven Authentik application icons, which are packaged into the
+`authentik-icons` ConfigMap. They come from the [Homarr Labs dashboard-icons
 repository](https://github.com/homarr-labs/dashboard-icons/tree/adca944175c9a3eb0471f78a4da87f237476d585/svg)
 at commit `adca944175c9a3eb0471f78a4da87f237476d585` under the upstream
 [Apache-2.0 license](https://github.com/homarr-labs/dashboard-icons/blob/adca944175c9a3eb0471f78a4da87f237476d585/LICENSE).
@@ -104,8 +106,9 @@ at commit `adca944175c9a3eb0471f78a4da87f237476d585` under the upstream
 The chart mounts the ConfigMap read-only at
 `/data/media/public/icons` in both the server and worker. Application
 blueprints refer to each file with a relative `meta_icon` path such as
-`icons/radarr.svg`. To update an icon, replace its SVG in the chart's `icons/`
-directory and sync the Authentik Argo CD application. These files are
+`icons/radarr.svg`. To update an icon, replace its SVG in `assets/icons/` and
+sync the Authentik Argo CD application. To use another icon in Authentik, add
+a relative symlink to it in the chart's `icons/` directory. These files are
 read-only; managing uploads through Authentik's Files interface would require
 separate writable persistent media storage.
 
