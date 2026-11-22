@@ -4,6 +4,14 @@ A k3s home server with Git-managed applications, shared media storage, single
 sign-on, and VPN-routed services. Argo CD renders the local Helm charts and
 reconciles the cluster; Infisical supplies secrets through External Secrets.
 
+![Home server overview](assets/diagrams/overview.png)
+
+### Media workflow
+
+![Media requests, downloads, library organisation, and playback](assets/diagrams/media-workflow.png)
+
+Editable source for all diagrams: [arch.pptx](assets/diagrams/arch.pptx).
+
 ## Functionality
 
 | | Service | Purpose and documentation |
@@ -21,16 +29,6 @@ reconciles the cluster; Infisical supplies secrets through External Secrets.
 | <img src="assets/icons/postgresql.svg" width="32" alt="PostgreSQL"> | PostgreSQL & storage | Host PostgreSQL for Authentik, NFS media shares, and retained local application config volumes. [Server setup](docs/server-setup.md) |
 
 The [bootstrap values](bootstrap/values.yaml) are the enabled-application list.
-
-### Overview
-
-![Home server overview](assets/diagrams/overview.png)
-
-Editable source for all diagrams: [arch.pptx](assets/diagrams/arch.pptx).
-
-### Media workflow
-
-![Media requests, downloads, library organisation, and playback](assets/diagrams/media-workflow.png)
 
 ## Setup
 
