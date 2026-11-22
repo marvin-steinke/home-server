@@ -69,12 +69,3 @@ namespaces:
   - name: tmp
     apps:
       - konstancji-prezent
-  #- name: minecraft
-  #  ignoreDifferences:
-  #    - group: apps
-  #      kind: Deployment
-  #      jsonPointers:
-  #        - /spec/replicas
-  #  apps:
-  #    - minecraft-server
-  #    - lazymc
